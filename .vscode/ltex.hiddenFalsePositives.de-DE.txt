@@ -1,0 +1,3 @@
+{"rule":"DE_CASE","sentence":"^\\QFaltung in Neuronalen Netzen.\\E$"}
+{"rule":"DE_CASE","sentence":"^\\QNeuronale Faltungsnetze und Pooling Michael Markl 25. Juni 2021 Mathematische Aspekte des Maschinellen Lernens Seminar zur Numerik bei Prof. Dr. Stykel\\E$"}
+{"rule":"DE_CASE","sentence":"^\\QDrei Kernresultate des Experiments Jedes Neuron hat ein lokales rezeptives Feld d. h. es reagiert nur auf Reize aus einer kleinen Umgebung des Ursprungsbildes.\\E$"}

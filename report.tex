@@ -1,8 +1,48 @@
 \documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english, ngerman]{babel}
+\usepackage[a5paper,margin=1mm]{geometry}
+\bibliographystyle{alphadin}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}[theorem]{Definition}
+
+
+\title{Neuronale Faltungsnetze und Pooling}
+\author{Michael Markl}
 
 \begin{document}
-    \section{Pooling}
+\maketitle
 
+
+\section{Einführung}
+
+Neuronale Netze werden bereits heutzutage auf zahlreiche Problemstellungen angewandt.
+Dabei ist Computer Vision -- also die Verarbeitung und Analyse von Bildern -- eine der meist genutzten Technologien, die dadurch ermöglicht wird.
+Ein klassisches Problem der Computer Vision ist, ein Bild zu einer bestimmten Kategorie zuzuordnen.
+Bei der Erkennung von handschriftlichen Ziffern hat LeCun in~\cite{LeCun1989} aufgezeigt, dass das Reduzieren eines Netzwerks durch das Teilen von Parametern mehrere Neuronen zwischen zwei Layern die topologische 2D-Struktur von Bildern ausnutzen kann und dadurch schneller eine höhere 
+
+% TODO:
+Diese Arbeit gibt einen Einblick in Theorie und Praxis von Faltungsnetzen sowie die oft dabei verwendeten Pooling-Layer.
+Als Grundlagen werden die Werke von Ian Goodfellow et al. in~\cite[Kapitel~9]{Goodfellow-et-al-2016} sowie von Ovidiu Calin in~\cite[Kapitel~15,16]{Calin2020} herangezogen.
+
+\section{Faltung in Neuronalen Netzen}
+
+Neuronale Netze.
+
+\section{Faltungsnetze}
+
+
+
+
+
+\begin{definition}[The Convolution Operation]
     
+\end{definition}
+
+\clearpage          % neue Seite für Literaturverzeichnis
+\nocite*
+\thispagestyle{empty}
+\bibliography{literature}
 
 \end{document}
