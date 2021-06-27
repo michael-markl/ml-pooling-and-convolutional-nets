@@ -1,0 +1,74 @@
+%% Creator: Inkscape inkscape 0.92.5, www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'cnn.pdf' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%% 
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+%%
+\begingroup%
+  \makeatletter%
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}%
+    \renewcommand\color[2][]{}%
+  }%
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}%
+    \renewcommand\transparent[1]{}%
+  }%
+  \providecommand\rotatebox[2]{#2}%
+  \newcommand*\fsize{\dimexpr\f@size pt\relax}%
+  \newcommand*\lineheight[1]{\fontsize{\fsize}{#1\fsize}\selectfont}%
+  \ifx\svgwidth\undefined%
+    \setlength{\unitlength}{445.12453575bp}%
+    \ifx\svgscale\undefined%
+      \relax%
+    \else%
+      \setlength{\unitlength}{\unitlength * \real{\svgscale}}%
+    \fi%
+  \else%
+    \setlength{\unitlength}{\svgwidth}%
+  \fi%
+  \global\let\svgwidth\undefined%
+  \global\let\svgscale\undefined%
+  \makeatother%
+  \begin{picture}(1,0.33206416)%
+    \lineheight{1}%
+    \setlength\tabcolsep{0pt}%
+    \put(0,0){\includegraphics[width=\unitlength,page=1]{cnn.pdf}}%
+    \put(0.06801,0.07988675){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{60.75}\smash{\begin{tabular}[t]{c}Input\end{tabular}}}}%
+    \put(0.25005966,0.07988675){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{60.75}\smash{\begin{tabular}[t]{c}Faltungslayer\end{tabular}}}}%
+    \put(0.61840914,0.07988675){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{60.75}\smash{\begin{tabular}[t]{c}Pooling-Layer\end{tabular}}}}%
+    \put(0.43140092,0.07988675){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{60.75}\smash{\begin{tabular}[t]{c}Faltungslayer\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=2]{cnn.pdf}}%
+    {\scriptsize
+     \renewcommand{\times}{\mathsf{x}}
+    \put(0.06754768,0.27752041){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{60.75}\smash{\begin{tabular}[t]{c}$r\times c$\end{tabular}}}}%
+    \put(0.25880607,0.27752041){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{60.75}\smash{\begin{tabular}[t]{c}$r^{(1)}\times c^{(1)}\times f^{(1)}$\end{tabular}}}}%
+    \put(0.44581426,0.27752041){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{60.75}\smash{\begin{tabular}[t]{c}$r^{(2)}\times c^{(2)}\times f^{(2)}$\end{tabular}}}}%
+    \put(0.62573878,0.27752041){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{60.75}\smash{\begin{tabular}[t]{c}$r^{(3)}\times c^{(3)}\times f^{(3)}$\end{tabular}}}}%
+    }
+    \put(0.76554645,0.02890803){\color[rgb]{0,0,0}\makebox(0,0)[t]{\smash{\begin{tabular}[t]{c}Fully-Connected\\Layer\end{tabular}}}}%
+    \put(0.88617078,0.07988675){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{60.75}\smash{\begin{tabular}[t]{c}Output\end{tabular}}}}%
+    \put(0.94919571,0.18968323){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{60.75}\smash{\begin{tabular}[t]{l}Hund\end{tabular}}}}%
+    \put(0.94919571,0.16205703){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{60.75}\smash{\begin{tabular}[t]{l}Katze\end{tabular}}}}%
+  \end{picture}%
+\endgroup%

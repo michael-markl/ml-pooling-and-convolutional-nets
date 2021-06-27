@@ -10,3 +10,6 @@
 *.nav
 *.snm
 *.toc
+*.mp4
+*.gz
+computational-study/logs

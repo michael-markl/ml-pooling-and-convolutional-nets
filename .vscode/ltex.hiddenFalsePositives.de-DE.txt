@@ -1,3 +1,5 @@
 {"rule":"DE_CASE","sentence":"^\\QFaltung in Neuronalen Netzen.\\E$"}
 {"rule":"DE_CASE","sentence":"^\\QNeuronale Faltungsnetze und Pooling Michael Markl 25. Juni 2021 Mathematische Aspekte des Maschinellen Lernens Seminar zur Numerik bei Prof. Dr. Stykel\\E$"}
 {"rule":"DE_CASE","sentence":"^\\QDrei Kernresultate des Experiments Jedes Neuron hat ein lokales rezeptives Feld d. h. es reagiert nur auf Reize aus einer kleinen Umgebung des Ursprungsbildes.\\E$"}
+{"rule":"PUNCTUATION_PARAGRAPH_END","sentence":"^\\QMit dem Satz von Fubini gilt \\E(?:Dummy|Ina|Jimmy-)[0-9]+$"}
+{"rule":"ART_ADJ_SOL","sentence":"^\\QBeispiele im Zweidimensionalem Graustufen-Bilder werden bspw. enkodiert als \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q mit \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q schwarz und \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q weiß.\\E$"}

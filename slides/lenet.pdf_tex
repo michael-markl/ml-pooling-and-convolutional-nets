@@ -1,0 +1,73 @@
+%% Creator: Inkscape inkscape 0.92.5, www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'lenet.pdf' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%% 
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+%%
+\begingroup%
+  \makeatletter%
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}%
+    \renewcommand\color[2][]{}%
+  }%
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}%
+    \renewcommand\transparent[1]{}%
+  }%
+  \providecommand\rotatebox[2]{#2}%
+  \newcommand*\fsize{\dimexpr\f@size pt\relax}%
+  \newcommand*\lineheight[1]{\fontsize{\fsize}{#1\fsize}\selectfont}%
+  \ifx\svgwidth\undefined%
+    \setlength{\unitlength}{478.03464394bp}%
+    \ifx\svgscale\undefined%
+      \relax%
+    \else%
+      \setlength{\unitlength}{\unitlength * \real{\svgscale}}%
+    \fi%
+  \else%
+    \setlength{\unitlength}{\svgwidth}%
+  \fi%
+  \global\let\svgwidth\undefined%
+  \global\let\svgscale\undefined%
+  \makeatother%
+  \begin{picture}(1,0.28611243)%
+    \lineheight{1}%
+    \setlength\tabcolsep{0pt}%
+    \put(0,0){\includegraphics[width=\unitlength,page=1]{lenet.pdf}}%
+    \put(0.07332246,0.21641227){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{60.75}\smash{\begin{tabular}[t]{c}32x32\end{tabular}}}}%
+    \put(0.23656447,0.24532942){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{60.75}\smash{\begin{tabular}[t]{c}28x28x6\end{tabular}}}}%
+    \put(0.39887368,0.19868885){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{60.75}\smash{\begin{tabular}[t]{c}14x14x6\end{tabular}}}}%
+    \put(0.46603612,0.26585127){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{60.75}\smash{\begin{tabular}[t]{c}10x10x16\end{tabular}}}}%
+    \put(0.53636657,0.25559035){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{60.75}\smash{\begin{tabular}[t]{l}5x5x16\end{tabular}}}}%
+    \put(0.65607852,0.20776955){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{60.75}\smash{\begin{tabular}[t]{l}120\end{tabular}}}}%
+    \put(0.74710295,0.20051398){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{60.75}\smash{\begin{tabular}[t]{l}84\end{tabular}}}}%
+    \put(0.81075411,0.20381197){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{60.75}\smash{\begin{tabular}[t]{l}10\end{tabular}}}}%
+    \put(0.18487185,0.00293902){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{60.75}\smash{\begin{tabular}[t]{c}5x5 Faltung\end{tabular}}}}%
+    \put(0.38913342,0.00293902){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{60.75}\smash{\begin{tabular}[t]{c}2x2 Pooling\end{tabular}}}}%
+    \put(0.53534942,0.00293902){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{60.75}\smash{\begin{tabular}[t]{c}5x5 Faltung\end{tabular}}}}%
+    \put(0.69111727,0.00293902){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{60.75}\smash{\begin{tabular}[t]{c}2x2 Pooling\end{tabular}}}}%
+    \put(0.77855297,0.02351212){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{60.75}\smash{\begin{tabular}[t]{c}Fully Connected\end{tabular}}}}%
+    \put(0.8564369,0.00440852){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{60.75}\smash{\begin{tabular}[t]{c}Fully Connected\end{tabular}}}}%
+    \put(0.9364512,0.03306392){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{60.75}\smash{\begin{tabular}[t]{c}Fully Connected\end{tabular}}}}%
+  \end{picture}%
+\endgroup%

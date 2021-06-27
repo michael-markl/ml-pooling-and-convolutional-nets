@@ -1,0 +1,5 @@
+font.family        : sans-serif
+font.sans-serif    : Helvetica, Avant Garde, Computer Modern Sans Serif
+font.monospace     : Courier, Computer Modern Typewriter
+font.size          : 15
+text.usetex        : true

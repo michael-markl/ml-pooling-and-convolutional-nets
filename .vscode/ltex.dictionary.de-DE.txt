@@ -5,3 +5,12 @@ Pooling
 LeCun
 Stykel
 Hubel
+Fubini
+Eindim
+Faltungslayer
+Faltungslayern
+Faltungslayers
+Biases
+Cauchy-Schwarz-Ungleichung
+Toeplitz-Matrizen
+Klassifizierungsnetzwerk
