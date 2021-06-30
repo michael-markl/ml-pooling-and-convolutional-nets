@@ -128,10 +128,18 @@ Oft wird die Faltung bzw. Kreuzkorrelation so dargestellt, dass der Kern diejeni
 \]
 
 \begin{proposition}
-    Sind $f$ und $g$ $L^1$-endliche Signale, so auch $f* g$ und $f\star g$.
+    Sind $f$ und $g$ $L^1$-endliche Signale, so auch $f * g$ und $f\star g$.
 \end{proposition}
 \begin{proof}
-    \todo{DO IT! JUST DO IT!}
+    Seien $f$ und $g$ $L^1$-endliche Signale. Wir nutzen den Satz von Fubini:
+    \begin{align*}
+        \norm{f * g}_1
+        &= \int_{\R^d} \abs{ \int_{\R^d} f(\tau)\cdot g(x - \tau) \diff\tau }\diff x
+        \leq \int_{\R^d}  \int_{\R^d} \abs{f(\tau)\cdot g(x - \tau)} \diff\tau \diff x\\
+        &= \int_{\R^d} \abs{f(\tau)} \cdot \int_{\R^d} \abs{g(x-\tau)} \diff x \diff\tau
+        = \norm{f}_1 \cdot \norm{g}_1 < \infty.
+    \end{align*}
+    Für $f \star g$ funktionieren die Schritte analog.
 \end{proof}
 
 Im Deep-Learning-Kontext wird meist von Faltung gesprochen, dabei wird aber tatsächlich oft die Kreuzkorrelation gemeint und verwendet.
