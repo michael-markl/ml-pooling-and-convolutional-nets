@@ -12,4 +12,7 @@
 *.toc
 *.mp4
 *.gz
+*.auxlock
+*.dpth
+*.md5
 computational-study/logs
