@@ -8,6 +8,7 @@
 \usepackage{amssymb}
 \usepackage{amsthm}
 \usepackage{subcaption}
+\captionsetup{justification=centering}
 
 
 \usepackage{mathbbol}
@@ -126,6 +127,13 @@ Oft wird die Faltung bzw. Kreuzkorrelation so dargestellt, dass der Kern diejeni
     (f\star g)(x) = \int_\Omega f(\tau - x) \cdot g(\tau) \diff\mu(\tau).
 \]
 
+\begin{proposition}
+    Sind $f$ und $g$ $L^1$-endliche Signale, so auch $f* g$ und $f\star g$.
+\end{proposition}
+\begin{proof}
+    \todo{DO IT! JUST DO IT!}
+\end{proof}
+
 Im Deep-Learning-Kontext wird meist von Faltung gesprochen, dabei wird aber tatsächlich oft die Kreuzkorrelation gemeint und verwendet.
 \todo{Später werden wir sehen, warum dies keine größeren Auswirkungen auf die Neuronalen Faltungslayer hat.}
 Wir werden daher im Folgenden meist nur die Kreuzkorrelation näher betrachten.
@@ -174,21 +182,19 @@ Der sogenannte \emph{Sobel-Filter} zur Erkennung von horizontalen Kanten hat die
         \resizebox{\textwidth}{\textwidth}{
         \input{2d-conv-layer.tex}
         }
-        \captionsetup{justification=centering}
         \caption{Das Input-Signal $G$.\\Schwarz $\hat=$ $0$, Weiß $\hat=$ $1$.}
     \end{subfigure}%
     \begin{subfigure}{0.5\textwidth}
         \resizebox{0.9285\textwidth}{0.9285\textwidth}{
         \input{2d-conv-layer-convolved.tex}
         }
-    \captionsetup{justification=centering}
     \caption{Die Kreuzkorrelation $F\star G$.\\Schwarz $\hat=$ $-3{,}84$, Weiß $\hat=$ $3{,}98$.}
     \end{subfigure}
     \caption{Die Kreuzkorrelation einer handgeschriebenen Ziffer mit dem Sobel-Filter $F$ zur Erkennung von horizontalen Kanten.}
     \label{fig:sobel-on-mnist}
 \end{figure}
 
-Bei der Berechnung der Kreuzkorrelation $F\star G$ mit dem Eingangssignal $G$, hilft die Vorstellung, dass der Kern $F$ schrittweise über den Input geschoben wird und in jedem Schritt einen Output-Pixel als die durch den Kern gewichtete Summe der Eingangspixel berechnet wird.
+Bei der Berechnung der Kreuzkorrelation $F\star G$ mit einem Eingangssignal $G$, hilft die Vorstellung, dass der Kern $F$ schrittweise über den Input geschoben wird und in jedem Schritt ein Output-Pixel als die durch den Kern gewichtete Summe der Eingangspixel berechnet wird.
 Dabei erhält man
 \[
 (F\star G)_{i,j} = \begin{matrix*}[l]
@@ -198,8 +204,12 @@ Dabei erhält man
     \end{matrix*}
 \]
 
-In Abbildung~\ref{fig:sobel-on-mnist} sieht man die Kreuzkorrelation des Sobel-Filters am Beispiel einer handschriftlichen Ziffer aus der MNIST-Datenbank in~\cite{lecun2010mnist}.
-
+In Abbildung~\ref{fig:sobel-on-mnist} sieht man die Kreuzkorrelation des Sobel-Filters am Beispiel einer handschriftlichen Ziffer aus der MNIST-Datenbank aus~\cite{lecun2010mnist}.
+Das Ausgangsbild $G$ hat $28\times 28$ Pixel.
+Wir betrachten zumeist nur solche Pixel von $F\star G$, in denen der gesamte Filter im \glqq relevanten Teil\grqq\ des Inputs, also innerhalb dieser $28\times 28$ Pixel ist.
+Daher hat das Output-Bild in beiden Längen $2$ Pixel weniger als $G$.
+Diese Technik nennt man Kreuzkorrelation \emph{ohne Padding}.
+\todo{In Abschnitt bla werden weitere Varianten der Kreuzkorrelation beleuchtet.}
 
 \section{Faltungsnetze}
 
