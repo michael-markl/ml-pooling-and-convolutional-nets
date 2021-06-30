@@ -1,0 +1,204 @@
+\documentclass{article}
+%\usepackage[a5paper,margin=5mm]{geometry}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english, ngerman]{babel}
+\usepackage{mathtools}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{subcaption}
+
+
+\usepackage{mathbbol}
+\usepackage{color}
+
+\usepackage{tikz}
+\usetikzlibrary{matrix}
+
+\DeclareSymbolFontAlphabet{\amsmathbb}{AMSb}%
+
+
+\bibliographystyle{alphadin}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\diff}{\,\textrm{d}}
+\newcommand{\todo}[1]{{\color{red} #1}}
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\abs}[1]{\left\lvert#1\right\rvert}
+\newcommand{\avg}{\textnormal{avg}}
+
+
+
+\title{Neuronale Faltungsnetze und Pooling}
+\author{Michael Markl}
+
+\begin{document}
+\maketitle
+
+
+\section{Einführung}
+
+Neuronale Netze werden bereits heutzutage auf zahlreiche Problemstellungen angewandt.
+Dabei ist Computer Vision -- also die Verarbeitung und Analyse von Bildern -- eine der meist genutzten Technologien, die dadurch ermöglicht wird.
+Ein klassisches Problem der Computer Vision ist, ein Bild zu einer bestimmten Kategorie zuzuordnen.
+Bei der Erkennung von handschriftlichen Ziffern hat LeCun in~\cite{LeCun1989} aufgezeigt, dass das Reduzieren eines Netzwerks durch das Teilen von Parametern mehrere Neuronen zwischen zwei Layern die topologische 2D-Struktur von Bildern ausnutzen kann und dadurch die Klassifizierung erheblich verbessern kann.
+
+% TODO:
+Diese Arbeit gibt einen Einblick in Theorie und Praxis von Faltungsnetzen sowie die oft dabei verwendeten Pooling-Layer.
+Als Grundlagen werden die Werke von Ian Goodfellow et al. in~\cite[Kapitel~9]{Goodfellow-et-al-2016} sowie von Ovidiu Calin in~\cite[Kapitel~15,16]{Calin2020} herangezogen.
+
+\section{Faltungslayer}
+
+\subsection{Faltung und Kreuzkorrelation}
+
+Bevor wir Faltungsnetze einführen, möchten wir zunächst die zugrundeliegenden mathematischen Konzepte einführen:
+Faltung und Kreuzkorrelation.
+Diese werden oft in der digitalen Signalverarbeitung genutzt, wo man zwischen kontinuierlichen und diskreten Signalen unterscheidet.
+
+\newcommand{\llambda}{\lambda}
+\newcommand{\cmeasure}{\mu_c}
+
+\begin{definition}[Signale]
+    Ein \emph{kontinuierliches Signal} ist eine Funktion $f: \R^d\rightarrow \R$.
+    Im Kontext von kontinuierlichen Signalen wird das Lebesgue-Maß $\llambda$ auf $\Omega\coloneqq \R^d$ verwendet.
+
+    Ein \emph{diskretes Signal} ist eine Funktion $f: \Z^d \rightarrow \R$.
+    Bei diskreten Signalen wird das Zählmaß $\cmeasure$ auf $\Omega\coloneqq \Z^d$ verwendet.
+
+    Ein Signal $f: \Omega \rightarrow \R$
+    \begin{itemize}
+        \item \emph{hat einen kompakten Träger}, falls es ein $R > 0$ gibt, sodass $f(x) = 0$ für $\norm{x}_\infty \geq R$ gilt,
+        \item heißt \emph{$L^1$-endlich}, falls $\norm{f}_1 \coloneqq \int_{\Omega} \abs{f(x)} \diff \mu(x) < \infty$,
+        \item heißt \emph{Energie-Signal}, falls $\norm{f}_2 \coloneqq \left(\int_{\Omega} f(x)^2 \diff \mu(x) \right)^{1/2} < \infty$.
+    \end{itemize}
+\end{definition}
+
+\begin{proposition}
+    Ein kontinuierliches Energie-Signal mit kompaktem Träger ist $L^1$-endlich.
+    Außerdem sind diskrete Signale mit kompaktem Träger $L^1$-endlich.
+\end{proposition}
+\begin{proof}
+    Sei $f$ ein kontinuierliches Energie-Signal mit $f(x) = 0$ für $\norm{x}_{\infty} \geq R$.
+    Sei $\mathbb{1}_R$ die charakteristische Funktion mit $\mathbb{1}_R(x) = 1$ für $\norm{x}_\infty \leq R$ und $\mathbb{1}_R(x) = 0$ sonst.
+    Sei außerdem $\langle \,\cdot\, , \,\cdot\, \rangle_{L_2}$ das Skalarprodukt auf dem Hilbertraum $L^2$.
+    Dann gilt mit der Cauchy-Schwarz-Ungleichung
+    \[
+        \norm{f}_1 
+        = \int_{\R^d} \abs{f(x)} \cdot \mathbb{1}_R(x) \diff x
+        = \langle \abs{f}, \mathbb{1}_R \rangle_{L^2}
+        \leq \norm{\abs{f}}_2 \cdot \norm{\mathbb{1}_R}_2 < \infty .
+    \]
+
+    Für diskrete Signale mit kompaktem Träger folgt die $L^1$-Endlichkeit bereits aus der Endlichkeit der Menge $\{ z\in\Z^d \mid \norm{z}_{\infty} \leq R\}$.
+\end{proof}
+
+\begin{definition}
+    Die \emph{Faltung} zweier diskreter bzw. kontinuierlicher Signale $f,g: \Omega\rightarrow \R$ ist definiert als 
+    \[
+        (f * g)(x) \coloneqq \int_\Omega f(\tau) \cdot g(x-\tau) \diff \mu(\tau).
+    \]
+    Die \emph{Kreuzkorrelation} von $f$ und $g$ ist definiert als
+    \[
+        (f \star g)(x) \coloneqq \int_\Omega f(\tau) \cdot g(x+\tau) \diff \mu(\tau).
+    \]
+    Dabei wird $f$ meist der \emph{Kern} oder \emph{Filter} und $g$ das \emph{(Eingangs-)Signal} genannt.
+\end{definition}
+
+Wir bemerken, dass der einzige Unterschied der Operationen darin besteht, dass bei der Faltung der Kern \glqq geflippt\grqq\ wird.
+Es gilt nämlich \[
+    \left(f \star g\right)(x) = \int_{\Omega} f(\tau) \cdot g(x+\tau) \diff\mu(\tau) = \int_\Omega f(-\tau) \cdot g(x - \tau) \diff\mu(\tau) = \left((\tau\mapsto f(-\tau)) * g\right)(x).
+    \]
+Ist der Kern \emph{symmetrisch}, gilt also $f(x) = f(-x)$ für alle $x\in\Omega$, so stimmt Kreuzkorrelation mit Faltung überein.
+Durch das \glqq Flippen\grqq\ des Kerns wird die Faltungsoperation kommutativ, was für die Kreuzkorrelation nicht gilt.
+Oft wird die Faltung bzw. Kreuzkorrelation so dargestellt, dass der Kern diejenige Funktion ist, welche verschoben und gegebenenfalls geflippt wird:
+\[
+    (f*g)(x) = \int_\Omega f(x - \tau) \cdot g(\tau)\diff\mu(\tau), \quad
+    (f\star g)(x) = \int_\Omega f(\tau - x) \cdot g(\tau) \diff\mu(\tau).
+\]
+
+Im Deep-Learning-Kontext wird meist von Faltung gesprochen, dabei wird aber tatsächlich die Kreuzkorrelation gemeint und verwendet.
+\todo{Später werden wir sehen, warum dies keine größeren Auswirkungen auf die Neuronalen Faltungslayer hat.}
+
+Wir betrachten zunächst einige Beispiele dieser Operationen.
+Definiere dazu die Signale
+\begin{align*}
+    f: \R \rightarrow \R, \quad x \mapsto \begin{cases}
+        \frac{1}{2} - x, & \text{für $x\in[-\frac{1}{2},\frac{1}{2}]$,}\\
+        0, & \text{sonst,}
+    \end{cases} \qquad
+    g: \R \rightarrow \R,\quad x \mapsto \begin{cases}
+        1,& \text{für $x \in [-\frac{1}{2},\frac{1}{2}]$}\\
+        0, & \text{sonst.}
+    \end{cases}
+\end{align*}
+
+In Abbildung~\todo{figure-a} kann man die Faltung $f * g$ der beiden Signale sehen, in Abbildung~\todo{figure-b} die Kreuzkorrelation~$f\star g$.
+
+
+In Anwendungen werden meist diskrete Signale mit kompaktem Träger betrachtet.
+Ein diskretes Signal dieser Form schreiben wir im eindimensionalen Fall $d=1$ als Vektor $f = (f_0, f_1, \dots, f_{n-1})$ und im zweidimensionalen Fall $d=2$ als Matrix $$F = (f_{i,j})_{\substack{i=0,\dots,m-1\\ j=0,\dots, n-1}}.$$
+Diese Signale werden für Indizes außerhalb der so-definierten Vektoren bzw. Matrizen als $0$ ausgewertet, also beispielsweise $f_z = 0$ für $z\in\Z\setminus[0,n-1]$ mit $f=(f_0, \dots, f_{n-1})$.
+
+Betrachtet man die Kreuzkorrelation von $g$ mit dem Filter $f=(\frac{1}{2}, \frac{1}{2})$, so erhält man den sogenannten \emph{gleitenden Mittelwert} von $g$:
+\[
+    (f \star g)_i = \int_\Z f_\tau \cdot g_{i + \tau} \diff \cmeasure(\tau) 
+    = \sum_{\tau\in\Z} f_\tau \cdot g_{i+ \tau}
+    = \frac{g_i}{2} + \frac{g_{i+1}}{2} = \frac{g_i + g_{i+1}}{2}
+\]
+
+Der sogenannte Sobel-Filter zur Erkennung von horizontalen Kanten hat die Form
+\[
+    F = \begin{pmatrix}
+        1 & 2 & 1 \\
+        0 & 0 & 0 \\ 
+        -1 & -2 & -1
+    \end{pmatrix}.
+\]
+
+
+
+
+\begin{figure}
+    \begin{subfigure}[c]{0.5\textwidth}
+        \resizebox{\textwidth}{\textwidth}{
+        \input{2d-conv-layer.tex}
+        }
+        \captionsetup{justification=centering}
+        \caption{Das Inputsignal $G$.\\Schwarz $\hat=$ $0$, Weiß $\hat=$ $1$}
+    \end{subfigure}%
+    \begin{subfigure}[c]{0.5\textwidth}
+        \resizebox{\textwidth}{\textwidth}{
+        \input{2d-conv-layer-convolved.tex}
+        }
+    \captionsetup{justification=centering}
+    \caption{Die Kreuzkorrelation $F\star G$.\\Schwarz $\hat=$ $-3{,}84$, Weiß $\hat=$ $3{,}98$}
+    \end{subfigure}
+    \caption{Die Kreuzkorrelation einer handgeschriebenen Ziffer mit dem Sobel-Filter $F$ zur Erkennung von horizontalen Kanten.}
+\end{figure}
+
+
+
+
+\section{Faltungsnetze}
+
+
+
+
+
+\begin{definition}[The Convolution Operation]
+    
+\end{definition}
+
+\clearpage          % neue Seite für Literaturverzeichnis
+\thispagestyle{empty}
+\bibliography{../literature}
+
+\end{document}

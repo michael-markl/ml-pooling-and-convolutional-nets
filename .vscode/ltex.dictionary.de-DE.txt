@@ -14,3 +14,5 @@ Biases
 Cauchy-Schwarz-Ungleichung
 Toeplitz-Matrizen
 Klassifizierungsnetzwerk
+Faltungsoperation
+Deep-Learning-Kontext
