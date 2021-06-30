@@ -16,7 +16,7 @@
 \usepackage{tikz}
 \usetikzlibrary{external}
 \tikzexternalize
-\usetikzlibrary{matrix}
+\usetikzlibrary{matrix} 
 
 \DeclareSymbolFontAlphabet{\amsmathbb}{AMSb}%
 
@@ -126,8 +126,9 @@ Oft wird die Faltung bzw. Kreuzkorrelation so dargestellt, dass der Kern diejeni
     (f\star g)(x) = \int_\Omega f(\tau - x) \cdot g(\tau) \diff\mu(\tau).
 \]
 
-Im Deep-Learning-Kontext wird meist von Faltung gesprochen, dabei wird aber tatsächlich die Kreuzkorrelation gemeint und verwendet.
+Im Deep-Learning-Kontext wird meist von Faltung gesprochen, dabei wird aber tatsächlich oft die Kreuzkorrelation gemeint und verwendet.
 \todo{Später werden wir sehen, warum dies keine größeren Auswirkungen auf die Neuronalen Faltungslayer hat.}
+Wir werden daher im Folgenden meist nur die Kreuzkorrelation näher betrachten.
 
 Wir betrachten zunächst einige Beispiele dieser Operationen.
 Definiere dazu die Signale
@@ -150,13 +151,15 @@ Ein diskretes Signal dieser Form schreiben wir im eindimensionalen Fall $d=1$ al
 Diese Signale werden für Indizes außerhalb der so-definierten Vektoren bzw. Matrizen als $0$ ausgewertet, also beispielsweise $f_z = 0$ für $z\in\Z\setminus[0,n-1]$ mit $f=(f_0, \dots, f_{n-1})$.
 
 Betrachtet man die Kreuzkorrelation von $g$ mit dem Filter $f=(\frac{1}{2}, \frac{1}{2})$, so erhält man den sogenannten \emph{gleitenden Mittelwert} von $g$:
-\[
+\[  
     (f \star g)_i = \int_\Z f_\tau \cdot g_{i + \tau} \diff \cmeasure(\tau) 
     = \sum_{\tau\in\Z} f_\tau \cdot g_{i+ \tau}
     = \frac{g_i}{2} + \frac{g_{i+1}}{2} = \frac{g_i + g_{i+1}}{2}
 \]
 
-Der sogenannte Sobel-Filter zur Erkennung von horizontalen Kanten hat die Form
+Um Kreuzkorrelation auf Graustufen-Bilder auszuführen, bestimmt man zu\-nächst eine Input-Enkodierung.
+Dabei wird oft eine Matrix $G\in[0,1]^{r\times c}$ gewählt, wobei $r$ die Anzahl an Reihen, $c$ die Anzahl an Spalten und $g_{i,j}$ die \emph{Aktivierung des Pixels} zwischen $0$ und $1$ sind, wobei der Wert~$0$ für Schwarz und der Wert~$1$ für Weiß stehen.
+Der sogenannte \emph{Sobel-Filter} zur Erkennung von horizontalen Kanten hat die Form
 \[
     F = \begin{pmatrix}
         1 & 2 & 1 \\
@@ -166,27 +169,36 @@ Der sogenannte Sobel-Filter zur Erkennung von horizontalen Kanten hat die Form
 \]
 
 
-
-
 \begin{figure}
-    \begin{subfigure}[c]{0.5\textwidth}
+    \begin{subfigure}{0.5\textwidth}
         \resizebox{\textwidth}{\textwidth}{
         \input{2d-conv-layer.tex}
         }
         \captionsetup{justification=centering}
-        \caption{Das Inputsignal $G$.\\Schwarz $\hat=$ $0$, Weiß $\hat=$ $1$}
+        \caption{Das Input-Signal $G$.\\Schwarz $\hat=$ $0$, Weiß $\hat=$ $1$.}
     \end{subfigure}%
-    \begin{subfigure}[c]{0.5\textwidth}
-        \resizebox{\textwidth}{\textwidth}{
+    \begin{subfigure}{0.5\textwidth}
+        \resizebox{0.9285\textwidth}{0.9285\textwidth}{
         \input{2d-conv-layer-convolved.tex}
         }
     \captionsetup{justification=centering}
-    \caption{Die Kreuzkorrelation $F\star G$.\\Schwarz $\hat=$ $-3{,}84$, Weiß $\hat=$ $3{,}98$}
+    \caption{Die Kreuzkorrelation $F\star G$.\\Schwarz $\hat=$ $-3{,}84$, Weiß $\hat=$ $3{,}98$.}
     \end{subfigure}
     \caption{Die Kreuzkorrelation einer handgeschriebenen Ziffer mit dem Sobel-Filter $F$ zur Erkennung von horizontalen Kanten.}
+    \label{fig:sobel-on-mnist}
 \end{figure}
 
+Bei der Berechnung der Kreuzkorrelation $F\star G$ mit dem Eingangssignal $G$, hilft die Vorstellung, dass der Kern $F$ schrittweise über den Input geschoben wird und in jedem Schritt einen Output-Pixel als die durch den Kern gewichtete Summe der Eingangspixel berechnet wird.
+Dabei erhält man
+\[
+(F\star G)_{i,j} = \begin{matrix*}[l]
+    \hphantom{+}1\cdot G_{i,j}  & + 2\cdot G_{i, j+1} & + 1\cdot G_{i, j+2} \\
+    + 0\cdot G_{i+1, j} &+ 0\cdot G_{i+1, j+1} &+ 0\cdot G_{i+1, j+2} \\
+    +1\cdot G_{i+1, j} &+ 2\cdot G_{i+1, j+1} &+ 1\cdot G_{i+2, j+2}.
+    \end{matrix*}
+\]
 
+In Abbildung~\ref{fig:sobel-on-mnist} sieht man die Kreuzkorrelation des Sobel-Filters am Beispiel einer handschriftlichen Ziffer aus der MNIST-Datenbank in~\cite{lecun2010mnist}.
 
 
 \section{Faltungsnetze}
@@ -201,6 +213,6 @@ Der sogenannte Sobel-Filter zur Erkennung von horizontalen Kanten hat die Form
 
 \clearpage          % neue Seite für Literaturverzeichnis
 \thispagestyle{empty}
-\bibliography{../literature}
+\bibliography{literature}
 
 \end{document}

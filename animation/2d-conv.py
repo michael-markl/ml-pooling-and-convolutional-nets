@@ -23,7 +23,7 @@ def img_to_tikz(image):
 
 image = cv2.imread('animation/4.png', 0)
 #image = cv2.resize(image, (20, 20))
-img_to_tikz(image)
+#img_to_tikz(image)
 
 kernel = np.array([
     [1, 2, 1],
@@ -37,9 +37,11 @@ kernel = np.array([
 #    [1, 1, 1]
 #]) / 9
 
-convolved = cv2.filter2D(image, cv2.CV_16S, kernel, borderType=cv2.BORDER_ISOLATED)
+convolved = cv2.filter2D(image, cv2.CV_16S, kernel, anchor=(0,0), borderType=cv2.BORDER_DEFAULT)
+convolved = convolved[:26, :26]
 
 convolved = cv2.normalize(convolved, None, 0, 100, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+
 
 cv2.namedWindow("image", cv2.WINDOW_NORMAL)
 cv2.imshow("image", image)
@@ -49,4 +51,4 @@ cv2.waitKey(0)
 cv2.destroyAllWindows()
 
 
-img_to_tikz(cv2.normalize(image, None, 0, 100, cv2.NORM_MINMAX, dtype=cv2.CV_8U))
+img_to_tikz(convolved)
