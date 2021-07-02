@@ -20,3 +20,4 @@ Layers
 lernbaren
 Dense-Layer
 lernbare
+Toeplitz-Matrix

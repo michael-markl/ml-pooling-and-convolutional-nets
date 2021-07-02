@@ -24,8 +24,6 @@
 \tikzexternalize[prefix=tikz/]
 \usetikzlibrary{matrix} 
 
-\DeclareSymbolFontAlphabet{\amsmathbb}{AMSb}%
-
 
 \bibliographystyle{alphadin}
 
@@ -44,11 +42,13 @@
 \newcommand{\avg}{\textnormal{avg}}
 
 \newcommand{\transl}[2]{T_{#1}\, #2}
-\newcommand{\fNat}[1]{\left[ #1 \right]}
+\newcommand{\fNat}[1]{[ #1 ]}
 
 
 \title{Neuronale Faltungsnetze und Pooling}
 \author{Michael Markl}
+\date{25. Juni 2021}
+\subtitle{Mathematische Aspekte des Maschinellen Lernens\\ Seminar bei Prof. Dr. Stykel}
 
 \begin{document}
 \maketitle
@@ -242,20 +242,20 @@ In einem Faltungslayer will man bestimmen, wie sehr das Eingangssignal mit einem
 Zusätzlich zu diesem Kern wird außerdem ein Bias gelernt, der zur Kreuzkorrelation addiert wird.
 Schließlich wird der Output des Layers durch eine Aktivierungsfunktion ausgewertet an dieser Summe berechnet.
 
-Seien also $x=(x_0,\dots,x_{d-1})\in\R^d$ ein Eingangssignal und $w=(w_0,\dots,w_{m-1})\in\R^m$ der gelernte Kern, $b\in\R$ der Bias und $\sigma: \R\rightarrow\R$ die Aktivierungsfunktion.
+Seien also $x=(x_0,\dots,x_{n-1})\in\R^n$ ein Eingangssignal und $w=(w_0,\dots,w_{m-1})\in\R^m$ der gelernte Kern, $b\in\R$ der Bias und $\sigma: \R\rightarrow\R$ die Aktivierungsfunktion.
 Dann lässt sich der Output $y$ des Layers beschreiben als
 \[
     y_i = \sigma\left( (w \star x)_i + b  \right)
     = \sigma\left( \sum_j w_j \cdot x_{i+j} + b \right).
 \]
-Wie in Abschnitt~\ref{subsec:convolution} beschrieben, werden wir hier Kreuzkorrelation ohne Padding verwenden, sodass $y$ genau ${d-m+1}$ Einträge hat.
+Wie in Abschnitt~\ref{subsec:convolution} beschrieben, werden wir hier Kreuzkorrelation ohne Padding verwenden, sodass $y$ genau ${n-m+1}$ Einträge hat.
 
 
 \begin{figure}
 \begin{subfigure}{0.5\textwidth}
     \centering
     \input{1d-conv-layer.tex}
-    \caption{Ein Eindimensionales Faltungslayer mit $d=5,m=2$.
+    \caption{Ein Eindimensionales Faltungslayer mit $n=5,m=2$.
     Viele Verbindungen teilen sich die drei Parameter $w_0$, $w_1$ und $b$.
     }
     \label{fig:one-dimensional-conv-layer}
@@ -288,22 +288,22 @@ Daher hat jeder Kern meistens eine weitere Dimension, deren Größe der Anzahl d
 
 Die vorangegangene Diskussion mündet in der folgenden Definition von eindimensionalen Faltungslayern, in der das Konzept mehrerer Feature-Maps mathematisch eingebettet wird.
 
-\begin{definition}[Eindimensionales Faltungslayer]
+\begin{definition}[Eindimensionales Faltungslayer]\label{def:one-dimensional-conv-layer}
     Ein eindimensionales Faltungslayer, welches das $l$-te Layer eines Netzes ist, hat die folgenden Eigenschaften:
     \begin{itemize}
-        \item die räumliche Input-Größe $d^{(l-1)}$ und die Anzahl an Input-Feature-Maps $f^{(l-1)}$,
+        \item die räumliche Input-Größe $n^{(l-1)}$ und die Anzahl an Input-Feature-Maps $f^{(l-1)}$,
         \item die räumliche Kernel-Größe $m^{(l)}$ und die Anzahl an Output-Feature-Maps $f^{(l)}$ und
         \item die Aktivierungsfunktion $\sigma^{(l)}$.
     \end{itemize}
-    Inputs des Layers haben die Form $x^{(l-1)}\in\R^{d^{(l-1)} \times f^{(l-1)}}$.
-    Es werden $f^{(l)}$ Kerne und Biases der Form $w^{(l),k}\in\R^{m^{(l)} \times f^{(l-1)}}, b^{(l),k}\in\R$ für  $k\in\{0,\dots, f^{(l)}-1\}$ gelernt.
-    Die räumliche Output-Größe ist $d^{(l)} = d^{(l-1)}-  m^{(l)} + 1$.
-    Outputs des Layers sind von der Form $x^{(l)}\in \R^{d^{(l)}\times f^{(l)}}$ und für $i\in\{0,\dots,d^{(l)}-1 \}$ und $k\in\{0,\dots,f^{(l) }-1 \}$ gilt
+    Inputs des Layers haben die Form $x^{(l-1)}\in\R^{n^{(l-1)} \times f^{(l-1)}}$.
+    Es werden $f^{(l)}$ Kerne und Biases der Form $w^{(l),k}\in\R^{m^{(l)} \times f^{(l-1)}}, b^{(l),k}\in\R$ für  $k\in \fNat{f^{(l)}}$ gelernt.
+    Die räumliche Output-Größe ist $n^{(l)} = n^{(l-1)}-  m^{(l)} + 1$.
+    Outputs des Layers sind von der Form $x^{(l)}\in \R^{n^{(l)}\times f^{(l)}}$ und für $i\in\fNat{n^{(l)}}$ und $k\in\fNat{f^{(l)}}$ gilt
     \begin{align*}
         x^{(l)}_{i,k}
-        =  \sigma^{(l)}\left( (w^{(l),k} \star x^{(l-1)})_{i,0} + b^{(l),k} \right)
-        = \sigma^{(l)} \left( 
-            \sum_{j=0}^{d^{(l-1)} - 1} \sum_{k'=0}^{f^{(l-1)} - 1}
+        &=  \sigma^{(l)}\left( (w^{(l),k} \star x^{(l-1)})_{i,0} + b^{(l),k} \right)\\
+        &= \sigma^{(l)} \left( 
+            \sum_{j \in \fNat{n^{(l-1)}}} \sum_{k'\in \fNat{f^{(l-1)}}}
             w^{(l),k}_{j,k'} \cdot x^{(l)}_{i+j, k'} + b^{(l), k}
         \right).
     \end{align*}
@@ -313,8 +313,152 @@ Die vorangegangene Diskussion mündet in der folgenden Definition von eindimensi
 
 \subsection{Mehrdimensionale Faltungslayer}
 
+Die Definition~\ref{def:one-dimensional-conv-layer} von eindimensionalen Faltungslayern lässt sich leicht auf mehrere Dimensionen erweitern.
+Für $d$-dimensionale Eingangssignale $x\in\R^{n_1\times \cdots n_d}$ mit nur einer Feature-Map als Input benötigt man ebenfalls einen $d$-dimensionalen Kern der Form $w\in\R^{m_1\times\cdots m_d}$, sodass sich die folgende Output-Feature-Map ergibt:
+\[
+    y_{i_1,\dots,i_d} = \sigma\left((w\star x)_{i_1,\dots,i_d} + b\right)
+    = \sigma\left( \sum_{j_1,\dots,j_d} w_{j_1,\dots,j_d} \cdot x_{i_1+j_1,\dots,i_d+j_d} + b \right).
+\]
+Wird wie zuvor Kreuzkorrelation ohne Padding verwendet, hat die Feature-Map $y$ genau $\prod_{i=1}^d (n_i - m_i +1)$ Einträge.
+Fässt man die Indizes $i_1,\dots,i_d$ und $j_1,\dots,j_d$ zu je einem Vektor $i$ und $j$ zusammen, erhält man mit $J\coloneqq \bigtimes_{i=1}^d [m_i]$ die etwas vereinfachte Schreibweise
+\[
+    y_{i} = \sigma\left((w\star x)_{i} + b\right)
+    = \sigma\left( \sum_{j \in J} w_j \cdot x_{i+j} + b \right) \quad \text{für $i\in I\coloneqq \bigtimes_{j=1}^d [n_j - m_j +1]$}.
+\]
+Das führt zur verallgemeinerten Definition, die sich nur bei den räumlichen Dimensionen von der eindimensionalen unterscheidet:
+
+\begin{definition}[Mehrdimensionales Faltungslayer]\label{def:multi-dimensional-conv-layer}
+    Ein $d$-dimensionales Faltungslayer, welches das $l$-te Layer eines Netzes ist, hat die folgenden Eigenschaften:
+    \begin{itemize}
+        \item die räumliche Input-Größe $n^{(l-1)}_1\times\cdots\times n^{(l-1)}_d$ und die Anzahl an Input-Feature-Maps $f^{(l-1)}$,
+        \item die räumliche Kernel-Größe $m^{(l)}_1\times \cdots \times m^{(l)}_d$ und die Anzahl an Output-Feature-Maps $f^{(l)}$ und
+        \item die Aktivierungsfunktion $\sigma^{(l)}$.
+    \end{itemize}
+    Inputs $x^{(l-1)}$ des Layers haben $n^{(l-1)}_1\times\cdots\times n^{(l-1)}_d \times f^{(l-1)}$ Einträge.
+    Es werden $f^{(l)}$ Kerne der Form $w^{(l),k}$ mit je $m^{(l)}_1\times\cdots\times m^{(l)}_d \times f^{(l-1)}$ Einträgen und Biases $b^{(l),k}\in\R$ für  $k\in \fNat{f^{(l)}}$ gelernt.
+    Die räumliche Output-Größe ist $n^{(l)}_i = n^{(l-1)}_i-  m^{(l)}_i + 1$ für $i\in\{1,\dots, d\}$.
+    Wir schreiben $J^{(l)} \coloneqq \bigtimes_{i=1}^d [m^{(l)}_i]$ und $I^{(l)} \coloneqq \bigtimes_{i=1}^d [n^{(l-1)}_i - m_i^{(l)} +1]$.
+    Outputs des Layers sind von der Form $x^{(l)}\in \R^{n^{(l)}\times f^{(l)}}$ und für $i\in I$ und $k\in\fNat{f^{(l)}}$ gilt
+    \begin{align*}
+        x^{(l)}_{i,k}
+        &=  \sigma^{(l)}\left( (w^{(l),k} \star x^{(l-1)})_{i,0} + b^{(l),k} \right)\\
+        &= \sigma^{(l)} \left( 
+            \sum_{j \in J} \sum_{k'\in \fNat{f^{(l-1)}}}
+            w^{(l),k}_{j,k'} \cdot x^{(l)}_{i+j, k'} + b^{(l), k}
+        \right).
+    \end{align*}
+\end{definition}
+
+Die in der Praxis am häufigsten verwendeten Faltungslayer sind solche von Dimension~$2$, da diese im Bereich der Computer-Vision von besonderer Relevanz sind.
+Hier hat man meist Bilder als Eingangsdaten.
+Ein farbiges Bild wird beispielsweise meist mithilfe von drei Kanälen für die Farben Rot, Grün und Blau -- also in drei zweidimensionalen Feature-Maps -- dargestellt.
+Beispiele von dreidimensionalen Signalen sind etwa 3D-Objekte oder Zeitreihen von zweidimensionalen Signalen wie zum Beispiel Filme.
 
 \subsection{Die Rolle der Aktivierungsfunktion}
+
+In diesem Abschnitt möchten wir die Relevanz der Nichtlinearität der Aktivierungsfunktion von Faltungslayern beleuchten.
+Dazu betrachten wir wieder eindimensionale Faltungslayer und die Funktionsvorschrift $y_i = \sigma( (w\star x)_i + b )$ mit $x\in\R^n, w\in\R^m$.
+
+Wie Dense-Layer lässt sich auch die Vorschrift von Faltungslayern in eine Matrixform bringen.
+Sei dazu $k\coloneqq n-m+1$ und $B\coloneqq (b, \dots, b)\in\R^k$ der Vektor, der in allen Einträgen den Bias $b$ enthält.
+Für einen Vektor $v\in\R^k$ sei $\sigma(v) \coloneqq (\sigma(v_0), \cdots, \sigma(v_{k-1}))$.
+Wir konstruieren eine Matrix $W\in\R^{k\times n}$ mit der Eigenschaft $y = \sigma( W\cdot x + B )$.
+Der $i$-te Eintrag von $W\cdot x$ muss also mit $\sum_{j\in\fNat{m}} w_j \cdot x_{i+j}$
+übereinstimmen.
+Dadurch hat $W$ die Form einer sogenannten \emph{Toeplitz-Matrix}, d.\,h. einer Matrix, in der ein Eintrag $W_{i,j}$ nur von der Diagonale $i-j$ abhängt.
+Denn, der Eintrag $W_{i,j}$ ist $0$ für $j < i$, $w_{j-i}$ für $i \leq j < i+m$ und wieder $0$ für $j \geq i+m$.
+Die so durch $w$ erzeugte Toeplitz-Matrix hat die Form
+\[
+    W = \begin{pmatrix}
+            w_0 & \cdots & w_{m-1} & 0 & \cdots & 0 \\
+            0 & \ddots & & \ddots  & & \vdots \\
+            \vdots  & & \ddots & & \ddots & 0 \\[4pt]
+             0 & \cdots & 0 & w_0 & \cdots & w_{m-1}
+        \end{pmatrix}.
+\]
+
+Im Gegensatz zu Dense-Layern ist hier jedoch nicht jeder Eintrag veränderbar bzw. lernbar.
+Stattdessen sind die meisten Einträge festgelegt durch $0$-en, andere Einträge teilen sich einen gemeinsamen Parameter des Kerns.
+
+Wir betrachten nun Faltungslayer, in denen als Aktivierungsfunktion nur die lineare Aktivierungsfunktion $\sigma(x) \coloneqq x$ verwendet wird.
+Das nächste Theorem zeigt, dass man in diesem Fall mehrere in Reihe geschalteten Faltungslayer mit einem einzigen Faltungslayer ersetzen kann.
+Dabei \todo{beschränken wir uns zunächst auf Faltungslayer mit je nur einer Input- und Output-Feature-Map.}
+
+\begin{theorem}[Komposition von eindimensionalen Faltungslayern]
+    Seien $w^{(1)}\in\R^{m^{(1)}}$, $w^{(2)}\in\R^{m^{(2)}}, \dots, w^{(L)}\in\R^{m^{(L)}}$ die (einzigen) Kernel von in Reihe geschalteten eindimensionalen Faltungslayern mit Biases $b^{(1)},\dots, b^{(L)}\in\R$ und linearer Aktivierungsfunktionen $\sigma^{(l)}(x) \coloneqq x$ für $l\in\{1,\dots,L\}$.
+
+    Dann gibt es ein äquivalentes Netz mit nur einem Faltungslayer mit linearer Aktivierungsfunktion und Kernel $w\in\R^m$ mit $m=\sum_{i=1}^L m_i - (L-1)$.
+\end{theorem}
+\begin{proof}
+    Es genügt, die Aussage für $L=2$ zu zeigen, da der Rest per Induktion über $L$ folgt:
+
+    Der Induktionsanfang bei $L=1$ gilt trivialerweise.
+    Die Aussage sei also für $L$ erfüllt und wir wünschen sie für $L+1$ zu zeigen.
+        
+    Nach Induktionsvoraussetzung können die ersten $L$ Layer zu einem äquivalenten Faltungslayer mit Kernel $w'\in \R^{m'}$ mit $m'=\sum_{i=1}^L m_i - (L-1)$ überführt werden.
+    Gilt die Aussage für $L=2$, so können wir dieses Layer mit dem $(L+1)$-ten Layer fusionieren, was ein äquivalentes Faltungslayer mit einem Kernel $w\in\R^m$ ergibt mit $m = m' + m^{(L+1)} - (2-1)$.
+    Dies lässt sich zu $m = \sum_{i=1}^{L+1} m^{(i)} - (L+1 - 1) $ vereinfachen, was die Indutkion beschließt.
+    
+    Wir zeigen also den Fall $L=2$. Es seien $\alpha\in \R^k$ und $\beta\in\R^l$ die Kerne zweier in Reihe geschalteten Faltungslayer mit zugehörigen Biases $b_1$ und $b_2$.
+    Die von $\alpha$ und $\beta$ erzeugten Toeplitz-Matrizen haben die Form
+    \setlength\arraycolsep{2pt}
+    \def\arraystretch{0.5}
+    \[
+        \mathcal{A} = \left(
+            \begin{matrix}
+                \alpha_0 & \cdots & \alpha_{k-1} & 0 & \cdots & 0 \\
+                0 & \ddots & & \ddots  & & \vdots \\
+                \vdots  & & \ddots & & \ddots & 0 \\[4pt]
+                    0 & \cdots & 0 & \alpha_0 & \cdots & \alpha_{k-1}
+            \end{matrix}
+        \right),\quad
+        \mathcal{B} = \left(
+            \begin{matrix}
+                \beta_0 & \cdots & \beta_{l-1} & 0 & \cdots & 0 \\
+                0 & \ddots & & \ddots  & & \vdots \\
+                \vdots  & & \ddots & & \ddots & 0 \\[4pt]
+                    0 & \cdots & 0 & \beta_0 & \cdots & \beta_{l-1}
+            \end{matrix}
+        \right),
+    \]
+    mit $\mathcal{A}\in\R^{n - k + 1\times n}$ und $\mathcal{B}\in \R^{n-k-l+2 \times n-k+1}$.
+    Sind $B_1\coloneqq (b_1,\dots,b_1)$ und $B_2\coloneqq (b_2,\dots,b_2)$ die Bias-Vektoren wie in der Matrix-Form beschrieben, lässt sich der Output des gemeinsamen Netzwerks ausdrücken als
+    \[
+        \mathcal{B}\cdot \left( \mathcal{A}\cdot x + B_1 \right) + B_2
+        = \mathcal{B}\cdot \mathcal{A}\cdot x + \mathcal{B}\cdot B_1 + B_2.
+    \]
+    Jeder Eintrag des Vektors $(\mathcal{B}\cdot B_1 + B_2)$ stimmt mit der Summe $\sum_{j\in\fNat{l}} \beta_j\cdot b_1 + b_2 \eqqcolon b$ überein, sodass $b$ eine geeignete Wahl als Bias unseres neuen Faltungslayers darstellt.
+    
+    Es bleibt zu zeigen, dass $\mathcal{B}\cdot \mathcal{A}$ die von einem Kernel der Länge $m\coloneqq k+l-1$ erzeugte Toeplitz-Matrix ist. 
+    Für die $i$-te Zeile dieser Matrix gilt
+    \[
+        \begin{aligned}
+        (\mathcal{B} \cdot \mathcal{A})_i
+        &= \left(
+            \begin{matrix}
+                \smash[b]{\underbrace{\begin{matrix}0 & \cdots & 0\end{matrix}}_{i-1}} & \beta_0 & \beta_1 & \cdots & \beta_{l-1} & 0 & \cdots & 0
+            \end{matrix}
+        \right) \cdot \mathcal{A} \\           
+        &= \left(
+                \begin{matrix}
+                    \beta_0 & \beta_1 & \cdots & \beta_{l-1}
+                \end{matrix}
+            \right) \cdot \left(\begin{matrix}
+                \mathbb{0}_{l\times (i-1)} & \smash[b]{\underbrace{\begin{matrix}
+                    \alpha_0 & \cdots & \alpha_{k-1} & 0 & \cdots & 0 \\
+                    0 & \ddots & & \ddots  & & \vdots \\
+                    \vdots  & & \ddots & & \ddots & 0 \\[4pt]
+                    0 & \cdots & 0 & \alpha_0 & \cdots & \alpha_{k-1} \\
+            \end{matrix}}_{l + k - 1 = m}} & \mathbb{0}_{l\times (\geq 0)}\\[2em]
+        \end{matrix}\right) \\[2em]
+        &= \left(\begin{matrix}
+            \smash[b]{\underbrace{\begin{matrix}0 & \cdots & 0\end{matrix}}_{i-1}} &
+            \smash[b]{\underbrace{\begin{matrix}\beta_0 \alpha_0 & ~\beta_0 \alpha_1 + \beta_1\alpha_0~ & \cdots & \sum_{j=0}^{l - 1} \beta_j \alpha_{m-1 - j}\end{matrix}}_{= \beta * \alpha \coloneqq w \text{ erzeugender Kernel}}} & 0 & \cdots & 0
+        \end{matrix}\right).\\[2em]
+    \end{aligned}
+    \]
+    \todo{Adjust the lines above and finish up the proof.}
+\end{proof}
 
 
 \subsection{Varianten der Faltungslayer}
