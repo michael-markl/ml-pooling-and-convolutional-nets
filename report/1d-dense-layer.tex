@@ -1,0 +1,75 @@
+\begin{tikzpicture}[main/.style = {draw, outer sep=3pt}] 
+    \node[main] (x0) at (0, 0)  {$x_0$}; 
+    \node[main] (x1) at (0, -1) {$x_1$};
+    \node[main] (x2) at (0, -2) {$x_2$}; 
+    \node[main] (x3) at (0, -3) {$x_3$};
+    \node[main] (x4) at (0, -4) {$x_4$}; 
+    \node[main] (x5) at (0, -5) {$x_5$};
+
+    \node (y0) at (2, -0.5) {$\sigma$};
+    \node (y1) at (2, -1.5) {$\sigma$};
+    \node (y2) at (2, -2.5) {$\sigma$};
+    \node (y3) at (2, -3.5) {$\sigma$};
+    \node (y4) at (2, -4.5) {$\sigma$};
+
+    \node[main] (yy0) at (3, -0.5) {$y_0$};
+    \node[main] (yy1) at (3, -1.5) {$y_1$};
+    \node[main] (yy2) at (3, -2.5) {$y_2$};
+    \node[main] (yy3) at (3, -3.5) {$y_3$};
+    \node[main] (yy4) at (3, -4.5) {$y_4$};
+
+    \draw [-] (x0.east) -> (y0.west);
+    \draw [-] (x1.east) -> (y0.west);
+    \draw [-] (x2.east) -> (y0.west);
+    \draw [-] (x3.east) -> (y0.west);
+    \draw [-] (x4.east) -> (y0.west);
+    \draw [-] (x5.east) -> (y0.west);
+
+    \draw [->, gray] (y0) + (0,0.5) -> (y0);
+    \draw [->] (y0) -> (yy0);
+
+
+    \draw [-] (x0.east) -> (y1.west);
+    \draw [-] (x1.east) -> (y1.west);
+    \draw [-] (x2.east) -> (y1.west);
+    \draw [-] (x3.east) -> (y1.west);
+    \draw [-] (x4.east) -> (y1.west);
+    \draw [-] (x5.east) -> (y1.west);
+
+    \draw [->, gray] (y1) + (0,0.5) -> (y1);
+    \draw [->] (y1) -> (yy1);
+
+
+    \draw [-] (x0.east) -> (y2.west);
+    \draw [-] (x1.east) -> (y2.west);
+    \draw [-] (x2.east) -> (y2.west);
+    \draw [-] (x3.east) -> (y2.west);
+    \draw [-] (x4.east) -> (y2.west);
+    \draw [-] (x5.east) -> (y2.west);
+    \draw [->, gray] (y2) + (0,0.5) ->  (y2);
+    \draw [->] (y2) -> (yy2);
+
+
+
+    \draw [-] (x0.east) -> (y3.west);
+    \draw [-] (x1.east) -> (y3.west);
+    \draw [-] (x2.east) -> (y3.west);
+    \draw [-] (x3.east) -> (y3.west);
+    \draw [-] (x4.east) -> (y3.west);
+    \draw [-] (x5.east) -> (y3.west);
+
+    \draw [->, gray] (y3) + (0,0.5) -> (y3);
+    \draw [->] (y3) -> (yy3);
+
+
+    \draw [-] (x0.east) -> (y4.west);
+    \draw [-] (x1.east) -> (y4.west);
+    \draw [-] (x2.east) -> (y4.west);
+    \draw [-] (x3.east) -> (y4.west);
+    \draw [-] (x4.east) -> (y4.west);
+    \draw [-] (x5.east) -> (y4.west);
+
+    \draw [->, gray] (y4) + (0,0.5) -> (y4);
+    \draw [->] (y4) -> (yy4);
+
+\end{tikzpicture} 

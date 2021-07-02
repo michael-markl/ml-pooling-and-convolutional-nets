@@ -1,4 +1,9 @@
-\documentclass{article}
+\documentclass[paper=a4, 	% Seitenformat
+		fontsize=11pt, 		% Schriftgr\"o\ss{}e
+		abstracton, 	% mit Abstrakt
+		headsepline, 	% Trennlinie f\"ur die Kopfzeile
+		notitlepage	% keine extra Titelseite
+		]{scrartcl}
 %\usepackage[a5paper,margin=5mm]{geometry}
 
 \usepackage[utf8]{inputenc}
@@ -16,7 +21,7 @@
 
 \usepackage{tikz}
 \usetikzlibrary{external}
-\tikzexternalize
+\tikzexternalize[prefix=tikz/]
 \usetikzlibrary{matrix} 
 
 \DeclareSymbolFontAlphabet{\amsmathbb}{AMSb}%
@@ -38,6 +43,8 @@
 \newcommand{\abs}[1]{\left\lvert#1\right\rvert}
 \newcommand{\avg}{\textnormal{avg}}
 
+\newcommand{\transl}[2]{T_{#1}\, #2}
+\newcommand{\fNat}[1]{\left[ #1 \right]}
 
 
 \title{Neuronale Faltungsnetze und Pooling}
@@ -60,7 +67,7 @@ Als Grundlagen werden die Werke von Ian Goodfellow et al. in~\cite[Kapitel~9]{Go
 
 \section{Faltungslayer}
 
-\subsection{Faltung und Kreuzkorrelation}
+\subsection{Faltung und Kreuzkorrelation}\label{subsec:convolution}
 
 Bevor wir Faltungsnetze einführen, möchten wir zunächst die zugrundeliegenden mathematischen Konzepte einführen:
 Faltung und Kreuzkorrelation.
@@ -118,7 +125,7 @@ Diese werden oft in der digitalen Signalverarbeitung genutzt, wo man zwischen ko
 Wir bemerken, dass der einzige Unterschied der Operationen darin besteht, dass bei der Faltung der Kern \glqq geflippt\grqq\ wird.
 Es gilt nämlich \[
     \left(f \star g\right)(x) = \int_{\Omega} f(\tau) \cdot g(x+\tau) \diff\mu(\tau) = \int_\Omega f(-\tau) \cdot g(x - \tau) \diff\mu(\tau) = \left((\tau\mapsto f(-\tau)) * g\right)(x).
-    \]
+\]
 Ist der Kern \emph{symmetrisch}, gilt also $f(x) = f(-x)$ für alle $x\in\Omega$, so stimmt Kreuzkorrelation mit Faltung überein.
 Durch das \glqq Flippen\grqq\ des Kerns wird die Faltungsoperation kommutativ, was für die Kreuzkorrelation nicht gilt.
 Oft wird die Faltung bzw. Kreuzkorrelation so dargestellt, dass der Kern diejenige Funktion ist, welche verschoben und gegebenenfalls geflippt wird:
@@ -134,9 +141,9 @@ Oft wird die Faltung bzw. Kreuzkorrelation so dargestellt, dass der Kern diejeni
     Seien $f$ und $g$ $L^1$-endliche Signale. Wir nutzen den Satz von Fubini:
     \begin{align*}
         \norm{f * g}_1
-        &= \int_{\R^d} \abs{ \int_{\R^d} f(\tau)\cdot g(x - \tau) \diff\tau }\diff x
-        \leq \int_{\R^d}  \int_{\R^d} \abs{f(\tau)\cdot g(x - \tau)} \diff\tau \diff x\\
-        &= \int_{\R^d} \abs{f(\tau)} \cdot \int_{\R^d} \abs{g(x-\tau)} \diff x \diff\tau
+        &= \int_{\Omega} \abs{ \int_\Omega f(\tau)\cdot g(x - \tau) \diff\mu(\tau) }\diff \mu(x)
+        \leq \int_{\Omega}  \int_{\Omega} \abs{f(\tau)\cdot g(x - \tau)} \diff\mu(\tau) \diff \mu(x)\\
+        &= \int_{\Omega} \abs{f(\tau)} \cdot \int_{\Omega} \abs{g(x-\tau)} \diff \mu(x) \diff\mu(\tau)
         = \norm{f}_1 \cdot \norm{g}_1 < \infty.
     \end{align*}
     Für $f \star g$ funktionieren die Schritte analog.
@@ -163,8 +170,10 @@ In Abbildung~\todo{figure-a} kann man die Faltung $f * g$ der beiden Signale seh
 
 
 In Anwendungen werden meist diskrete Signale mit kompaktem Träger betrachtet.
-Ein diskretes Signal dieser Form schreiben wir im eindimensionalen Fall $d=1$ als Vektor $f = (f_0, f_1, \dots, f_{n-1})$ und im zweidimensionalen Fall $d=2$ als Matrix $$F = (f_{i,j})_{\substack{i=0,\dots,m-1\\ j=0,\dots, n-1}}.$$
-Diese Signale werden für Indizes außerhalb der so-definierten Vektoren bzw. Matrizen als $0$ ausgewertet, also beispielsweise $f_z = 0$ für $z\in\Z\setminus[0,n-1]$ mit $f=(f_0, \dots, f_{n-1})$.
+Ein diskretes Signal dieser Form schreiben wir im eindimensionalen Fall $d=1$ als Vektor $f = (f_0, f_1, \dots, f_{n-1})$, wobei wir für eine leichtere Notation stets bei $0$ anfangen zu indizieren.
+Dazu führen wir als Notation $\fNat{n}\coloneqq \{0, \dots, n-1\}$ ein. 
+Zweidimensionale Signale mit kompaktem Träger schreiben wir demnach als Matrix $$F = (f_{i,j})_{\substack{i\in\fNat{m}\\ j\in\fNat{n}}}.$$
+Diese Signale werden für Indizes außerhalb der so-definierten Vektoren bzw. Matrizen als $0$ ausgewertet, also beispielsweise $f_z = 0$ für $z\in\Z\setminus\fNat{n}$ mit $f=(f_0, \dots, f_{n-1})$.
 
 Betrachtet man die Kreuzkorrelation von $g$ mit dem Filter $f=(\frac{1}{2}, \frac{1}{2})$, so erhält man den sogenannten \emph{gleitenden Mittelwert} von $g$:
 \[  
@@ -186,24 +195,25 @@ Der sogenannte \emph{Sobel-Filter} zur Erkennung von horizontalen Kanten hat die
 
 
 \begin{figure}
-    \begin{subfigure}{0.5\textwidth}
+    \centering
+    \begin{subfigure}{0.4\textwidth}
         \resizebox{\textwidth}{\textwidth}{
         \input{2d-conv-layer.tex}
         }
         \caption{Das Input-Signal $G$.\\Schwarz $\hat=$ $0$, Weiß $\hat=$ $1$.}
     \end{subfigure}%
-    \begin{subfigure}{0.5\textwidth}
+    \begin{subfigure}{0.4\textwidth}
         \resizebox{0.9285\textwidth}{0.9285\textwidth}{
         \input{2d-conv-layer-convolved.tex}
         }
     \caption{Die Kreuzkorrelation $F\star G$.\\Schwarz $\hat=$ $-3{,}84$, Weiß $\hat=$ $3{,}98$.}
     \end{subfigure}
-    \caption{Die Kreuzkorrelation einer handgeschriebenen Ziffer mit dem Sobel-Filter $F$ zur Erkennung von horizontalen Kanten.}
+    \caption{Die Kreuzkorrelation ohne Padding einer handgeschriebenen Ziffer mit dem Sobel-Filter $F$ zur Erkennung von horizontalen Kanten.}
     \label{fig:sobel-on-mnist}
 \end{figure}
 
-Bei der Berechnung der Kreuzkorrelation $F\star G$ mit einem Eingangssignal $G$, hilft die Vorstellung, dass der Kern $F$ schrittweise über den Input geschoben wird und in jedem Schritt ein Output-Pixel als die durch den Kern gewichtete Summe der Eingangspixel berechnet wird.
-Dabei erhält man
+Bei der Berechnung der Kreuzkorrelation $F\star G$ mit einem Eingangssignal~$G$ hilft die Vorstellung, dass der Kern $F$ schrittweise über den Input geschoben wird und in jedem Schritt ein Output-Pixel als die durch den Kern gewichtete Summe der Eingangspixel berechnet wird.
+Dabei erhält man für den Sobel-Filter~$F$:
 \[
 (F\star G)_{i,j} = \begin{matrix*}[l]
     \hphantom{+}1\cdot G_{i,j}  & + 2\cdot G_{i, j+1} & + 1\cdot G_{i, j+2} \\
@@ -217,11 +227,124 @@ Das Ausgangsbild $G$ hat $28\times 28$ Pixel.
 Wir betrachten zumeist nur solche Pixel von $F\star G$, in denen der gesamte Filter im \glqq relevanten Teil\grqq\ des Inputs, also innerhalb dieser $28\times 28$ Pixel ist.
 Daher hat das Output-Bild in beiden Längen $2$ Pixel weniger als $G$.
 Diese Technik nennt man Kreuzkorrelation \emph{ohne Padding}.
-\todo{In Abschnitt bla werden weitere Varianten der Kreuzkorrelation beleuchtet.}
+Allgemeiner: Sei $G\in\R^{n_1\times\cdots \times n_d}$ ein Eingangssignal und $F\in\R^{m_1\times\cdots\times m_d}$ ein Filter mit $n_i \geq m_i$, so hat die Kreuzkorrelation von $F$ und $G$ ohne Padding die Form $H\in\R^{k_1\times\cdots\times k_d}$ mit $k_i = n_i - m_i + 1$. 
+\todo{In Abschnitt bla werden weitere Varianten der Kreuzkorrelation beleuchtet, die bei Faltungslayern zum Einsatz kommen.}
+
+
+
+
+\subsection{Eindimensionale Faltungslayer}
+
+Wir betrachten zunächst eindimensionale Faltungslayer; das heißt, in diesem Abschnitt werden nur eindimensionale Eingangssignale beachtet.
+Ein Beispiel für ein solches Eingangssignal ist ein Audiosignal, welches in einer bestimmten Frequenz abgetastet wird.
+
+In einem Faltungslayer will man bestimmen, wie sehr das Eingangssignal mit einem bestimmten, gelernten Kern korreliert.
+Zusätzlich zu diesem Kern wird außerdem ein Bias gelernt, der zur Kreuzkorrelation addiert wird.
+Schließlich wird der Output des Layers durch eine Aktivierungsfunktion ausgewertet an dieser Summe berechnet.
+
+Seien also $x=(x_0,\dots,x_{d-1})\in\R^d$ ein Eingangssignal und $w=(w_0,\dots,w_{m-1})\in\R^m$ der gelernte Kern, $b\in\R$ der Bias und $\sigma: \R\rightarrow\R$ die Aktivierungsfunktion.
+Dann lässt sich der Output $y$ des Layers beschreiben als
+\[
+    y_i = \sigma\left( (w \star x)_i + b  \right)
+    = \sigma\left( \sum_j w_j \cdot x_{i+j} + b \right).
+\]
+Wie in Abschnitt~\ref{subsec:convolution} beschrieben, werden wir hier Kreuzkorrelation ohne Padding verwenden, sodass $y$ genau ${d-m+1}$ Einträge hat.
+
+
+\begin{figure}
+\begin{subfigure}{0.5\textwidth}
+    \centering
+    \input{1d-conv-layer.tex}
+    \caption{Ein Eindimensionales Faltungslayer mit $d=5,m=2$.
+    Viele Verbindungen teilen sich die drei Parameter $w_0$, $w_1$ und $b$.
+    }
+    \label{fig:one-dimensional-conv-layer}
+\end{subfigure}%
+\begin{subfigure}{0.5\textwidth}
+    \centering
+    \input{1d-dense-layer.tex}
+    \caption{Ein Dense-Layer. Jede Verbindung hat ein eigenes Gewicht und jedes Output-Neuron einen eigenen Bias.}
+    \label{fig:one-dimensional-dense-layer}
+\end{subfigure}
+    \caption{Zwei eindimensionale Layer mit 6 Input- und 5 Output-Neuronen.}
+    \label{fig:one-dimensional-layers}
+\end{figure}
+
+In Abbildung~\ref{fig:one-dimensional-conv-layer} kann man ein Beispiel eines solchen Faltungslayers sehen.
+Im Vergleich zu einem Dense-Layer in Abbildung~\ref{fig:one-dimensional-dense-layer} hat das Faltungslayer hier nur $10$ statt $30$ Verbindungen und nur $3$ statt $35$ lernbare Parameter.
+Trotzdem kann ein einzelnes Faltungslayer mit vergleichsweise kleinem Kern vor allem lokale Eigenschaften und Muster bereits sehr gut erkennen.
+
+Da die Kreuzkorrelation prüft, wie sehr sich ein Eingangssignal dem Kern an einer bestimmten Stelle ähnelt, nennen wir den Output $y$ auch oft eine \emph{Feature-Map}.
+Wir können $y$ nämlich auffassen als Karte, auf der man nachsehen kann, wie stark ein Merkmal an einer bestimmten Stelle im Eingangssignal ausgeprägt ist.
+
+Dabei ist es oftmals interessant, in einem Layer parallel mehrere Feature-Maps zu berechnen, da auch andere Merkmale aus dem Eingangssignal für die Minimierung der Zielfunktion interessant sein können.
+In größeren neuronalen Netzen wird die Verwendung von Faltungslayern aus diesem Grund oft als \emph{Feature-Extraktion} bezeichnet.
+Umgesetzt wird dies, indem mehrere Kernel gleichzeitig auf denselben Eingangsdaten operieren und so mehrere Feature-Maps erzeugen.
+
+Weil man häufig Faltungslayer hintereinander schaltet, müssen diese als Input auch mehrere solcher Feature-Maps akzeptieren.
+Ein weiterer Grund mehrerer Eingangskanäle kann sein, dass die Input-Daten des Netzes bereits mehrere Feature-Maps beinhalten:
+Beispielsweise kann eine Audiodatei mehrere Tonspuren enthalten, in der jede der Spuren ein eigenes eindimensionales Signal ist, in der aber alle Spuren zeitlich aufeinander abgestimmt sind.
+Daher hat jeder Kern meistens eine weitere Dimension, deren Größe der Anzahl der eingehenden Features entspricht, sodass alle Input-Feature-Maps in die Berechnung einer jeden neuen Output-Feature-Map einbezogen wird.
+
+Die vorangegangene Diskussion mündet in der folgenden Definition von eindimensionalen Faltungslayern, in der das Konzept mehrerer Feature-Maps mathematisch eingebettet wird.
+
+\begin{definition}[Eindimensionales Faltungslayer]
+    Ein eindimensionales Faltungslayer, welches das $l$-te Layer eines Netzes ist, hat die folgenden Eigenschaften:
+    \begin{itemize}
+        \item die räumliche Input-Größe $d^{(l-1)}$ und die Anzahl an Input-Feature-Maps $f^{(l-1)}$,
+        \item die räumliche Kernel-Größe $m^{(l)}$ und die Anzahl an Output-Feature-Maps $f^{(l)}$ und
+        \item die Aktivierungsfunktion $\sigma^{(l)}$.
+    \end{itemize}
+    Inputs des Layers haben die Form $x^{(l-1)}\in\R^{d^{(l-1)} \times f^{(l-1)}}$.
+    Es werden $f^{(l)}$ Kerne und Biases der Form $w^{(l),k}\in\R^{m^{(l)} \times f^{(l-1)}}, b^{(l),k}\in\R$ für  $k\in\{0,\dots, f^{(l)}-1\}$ gelernt.
+    Die räumliche Output-Größe ist $d^{(l)} = d^{(l-1)}-  m^{(l)} + 1$.
+    Outputs des Layers sind von der Form $x^{(l)}\in \R^{d^{(l)}\times f^{(l)}}$ und für $i\in\{0,\dots,d^{(l)}-1 \}$ und $k\in\{0,\dots,f^{(l) }-1 \}$ gilt
+    \begin{align*}
+        x^{(l)}_{i,k}
+        =  \sigma^{(l)}\left( (w^{(l),k} \star x^{(l-1)})_{i,0} + b^{(l),k} \right)
+        = \sigma^{(l)} \left( 
+            \sum_{j=0}^{d^{(l-1)} - 1} \sum_{k'=0}^{f^{(l-1)} - 1}
+            w^{(l),k}_{j,k'} \cdot x^{(l)}_{i+j, k'} + b^{(l), k}
+        \right).
+    \end{align*}
+\end{definition}
+
+\todo{Maybe add another figure with multiple input and output feature maps}
+
+\subsection{Mehrdimensionale Faltungslayer}
+
+
+\subsection{Die Rolle der Aktivierungsfunktion}
+
+
+\subsection{Varianten der Faltungslayer}
+
+
+
+\subsection{Äquivarianz}
+
+\todo{Eine wichtige Eigenschaft der den Faltungslayern zugrundeliegenden Kreuzkorrelation ist die sogenannte Äquivarianz bezüglich Translation.
+In anderen Worten: Es ist egal, ob zuerst die Kreuzkorrelation bezüglich eines Filters $f$ angewandt wird und anschließend das Ergebnis verschoben wird oder ob zuerst das Eingangssignal verschoben wird und anschließend die Kreuzkorrelation bezüglich $f$ berechnet wird.
+
+\begin{proposition}[Äquivarianz bzgl. Translation]
+    Sei $f$ ein $L^1$-endliches Signal.
+    Definiere $\mathcal{C}(g)\coloneqq f\star g$ als die Kreuzkorrelation mit $f$ und $\transl{a}{(g)}(x) \coloneqq g(x - a)$ für ein Signal $g$ und $a\in\R^d$.
+    Dann gilt \[ \mathcal{C}(\transl{a}{(g)}) = \transl{a}{(\mathcal{C}(g))}. \]
+\end{proposition}
+
+\begin{proof}
+    $\mathcal{C}(T_a\, g)(x) = \int_{\R^d} f(\tau) \cdot g(x - a + \tau) \diff \tau = \transl{a}{\mathcal{C}(g)}$
+\end{proof}
+
+
+}
+
+
+\section{Pooling}
+
+
 
 \section{Faltungsnetze}
-
-
 
 
 

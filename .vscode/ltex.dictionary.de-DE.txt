@@ -16,3 +16,7 @@ Toeplitz-Matrizen
 Klassifizierungsnetzwerk
 Faltungsoperation
 Deep-Learning-Kontext
+Layers
+lernbaren
+Dense-Layer
+lernbare
