@@ -292,7 +292,7 @@ Die vorangegangene Diskussion mündet in der folgenden Definition von eindimensi
     Ein eindimensionales Faltungslayer, welches das $l$-te Layer eines Netzes ist, hat die folgenden Eigenschaften:
     \begin{itemize}
         \item die räumliche Input-Größe $n^{(l-1)}$ und die Anzahl an Input-Feature-Maps $f^{(l-1)}$,
-        \item die räumliche Kernel-Größe $m^{(l)}$ und die Anzahl an Output-Feature-Maps $f^{(l)}$ und
+        \item die räumliche Kernel-Größe $m^{(l)}\leq n^{(l-1)}$ und die Anzahl an Output-Feature-Maps $f^{(l)}$ und
         \item die Aktivierungsfunktion $\sigma^{(l)}$.
     \end{itemize}
     Inputs des Layers haben die Form $x^{(l-1)}\in\R^{n^{(l-1)} \times f^{(l-1)}}$.
@@ -331,7 +331,7 @@ Das führt zur verallgemeinerten Definition, die sich nur bei den räumlichen Di
     Ein $d$-dimensionales Faltungslayer, welches das $l$-te Layer eines Netzes ist, hat die folgenden Eigenschaften:
     \begin{itemize}
         \item die räumliche Input-Größe $n^{(l-1)}_1\times\cdots\times n^{(l-1)}_d$ und die Anzahl an Input-Feature-Maps $f^{(l-1)}$,
-        \item die räumliche Kernel-Größe $m^{(l)}_1\times \cdots \times m^{(l)}_d$ und die Anzahl an Output-Feature-Maps $f^{(l)}$ und
+        \item die räumliche Kernel-Größe $m^{(l)}_1\times \cdots \times m^{(l)}_d$ mit $m^{(l)}_i \leq n^{(l-1)}_i$ und die Anzahl an Output-Feature-Maps $f^{(l)}$ und
         \item die Aktivierungsfunktion $\sigma^{(l)}$.
     \end{itemize}
     Inputs $x^{(l-1)}$ des Layers haben $n^{(l-1)}_1\times\cdots\times n^{(l-1)}_d \times f^{(l-1)}$ Einträge.
@@ -470,7 +470,7 @@ Wir betrachten erneut den Kern, der beim Fusionieren zweier Faltungslayer ensteh
 Dieser hat die Form $w_j \coloneqq \sum_{p\in\fNat{l}} \beta_p \cdot \alpha_{j-p}$ für $j\in\fNat{m}$.
 Dies entspricht der Faltung von $\beta$ und $\alpha$, also $w_j = (\beta * \alpha)_j$ für $j\in\fNat{m}$.
 Allgemeiner können wir die folgende Beziehung von Kreuzkorrelation und Faltung zeigen:
-\begin{proposition}
+\begin{proposition}\label{prop:associativity-cross-corr}
     Für $L^1$-endliche Signale $f,g,h$ gilt $f\star (g \star h) = (f*g)\star h$.
 \end{proposition}
 \begin{proof}
@@ -498,10 +498,10 @@ Jedoch wollen wir die Aussage nun sogar für mittels linearer Aktivierungsfunkti
 \end{theorem}
 \begin{proof}
     Wir nutzen für das gegebene $L$-Layer-Netz die Notation aus Definition~\ref{def:multi-dimensional-conv-layer}.
-    Wie in Theorem~\ref{thm:matrix-collapse-linear-conv-layers} genügt es, die Aussage nur für den Fall $L=2$ zu zeigen; \todo{der Rest folgt induktiv.}
+    Wie in Theorem~\ref{thm:matrix-collapse-linear-conv-layers} genügt es, die Aussage nur für den Fall $L=2$ zu zeigen; der Rest folgt auch hier induktiv.
 
     \newcommand{\bcdot}{\boldsymbol{\cdot}}
-    Dazu benötigen wir folgende Notation\todo{en}.
+    Dazu benötigen wir folgende Notationen.
     Definieren wir \[
         w^{(l), k}_{\bcdot, k'}\coloneqq \left( w_{j,k'}^{(l),k}\right)_{j\in J^{(l)}}
         \quad \text{und} \quad
@@ -519,7 +519,7 @@ Jedoch wollen wir die Aussage nun sogar für mittels linearer Aktivierungsfunkti
         = \sum_{k'\in \fNat{f^{(l-1)}}}  \left(w^{(l),k}_{\bcdot,k'} \star x^{(l-1)}_{\bcdot,k'} \right)_i + b^{(l),k}
     \end{align*}
     für $i\in I^{(l)}, k\in\fNat{f^{(l)}}$.
-    Für den Output von $l=2$ gilt dann für $i_2\in I^{(2)}, k_2\in \fNat{f^{(2)}}$
+    Für den Output von Layer $2$ gilt dann für $i_2\in I^{(2)}, k_2\in \fNat{f^{(2)}}$
     \begin{align*}
         x^{(2)}_{i_2,k_2}
         &= \sum_{k_1\in \fNat{f^{(1)}}}  \left(w^{(2),k_2}_{\bcdot,k_1} \star x^{(1)}_{\bcdot,k_1} \right)_{i_2} + b^{(2),k_2} \\
@@ -527,9 +527,9 @@ Jedoch wollen wir die Aussage nun sogar für mittels linearer Aktivierungsfunkti
 %
             \sum_{k_0\in \fNat{f^{(0)}}}  \left(w^{(1),k_1}_{\bcdot,k_0} \star x^{(0)}_{\bcdot,k_0} \right)_{i_1} + b^{(1),k_1}
 %
-         \right)_{i_1\in I^{(1)}} \right)_{i_2} + b^{(2),k_2}
+         \right)_{i_1\in I^{(1)}} \right)_{i_2} + b^{(2),k_2}.
     \end{align*}
-    Da Kreuzkorrelation distributiv über $+$ ist, lässt sich der Term mit \[
+    Da Kreuzkorrelation distributiv über Addition ist, lässt sich dieser Term mit \[
         b^{k_2}\coloneqq \sum_{k_1\in\fNat{f^{(1)}}}\sum_{j\in J^{(2)}} w^{(2), k_2}_{j,k_1} \cdot b^{(1),k_1} + b^{(2), k_2}
     \]
     \newcommand{\rest}[2]{\left.{#1}\right|_{#2}}
@@ -540,8 +540,27 @@ Jedoch wollen wir die Aussage nun sogar für mittels linearer Aktivierungsfunkti
         \rest{\left(w^{(1),k_1}_{\bcdot,k_0} \star x^{(0)}_{\bcdot,k_0} \right)}{I^{(1)}}
         \right)_{i_2} + b^{k_2}.
     \]
-
-    \todo{Finish up from here.}
+    Aufgrund der Wahl von $I^{(2)}\ni i_2$ spielt die Einschränkung auf $I^{(1)}$ keine Rolle.
+    Proposition~\ref{prop:associativity-cross-corr} impliziert nun
+    \begin{align*}
+        x^{(2)}_{i_2,k_2} 
+        &= \sum_{k_0\in \fNat{f^{(0)}}}\sum_{k_1\in \fNat{f^{(1)}}}  \left( \left( w^{(2),k_2}_{\bcdot,k_1} * 
+        w^{(1),k_1}_{\bcdot,k_0}\right) \star x^{(0)}_{\bcdot,k_0}
+        \right)_{i_2} + b^{k_2} \\
+        &= \sum_{k_0\in \fNat{f^{(0)}}} \left( \left(
+            \sum_{k_1\in \fNat{f^{(1)}}}  w^{(2),k_2}_{\bcdot,k_1} * 
+        w^{(1),k_1}_{\bcdot,k_0}\right) \star x^{(0)}_{\bcdot,k_0}
+        \right)_{i_2} + b^{k_2}.
+    \end{align*}
+    Definieren wir den Kern $w^{k_2}_{\bcdot, k_0} \coloneqq \sum_{k_1\in \fNat{f^{(1)}}}  w^{(2),k_2}_{\bcdot,k_1} * 
+    w^{(1),k_1}_{\bcdot,k_0}$, dessen Träger in der Menge $\bigtimes_{i=1}^d \fNat{m^{(1)}_i + m^{(2)}_i - 1}$ enthalten ist, erhalten wir
+    \[
+        x^{(2)}_{i_2, k_2}
+        = \sum_{k_0\in \fNat{f^{(0)}}} \left( w^{k_2}_{\bcdot, k_0}\star x^{(0)}_{\bcdot,k_0}
+        \right)_{i_2} + b^{k_2}
+        = \left( w^{k_2} \star x^{(0)} \right)_{i_2, 0} + b^{k_2},
+    \]
+    sodass die Kerne $(w^{k_2})_{k_2\in\fNat{f^{(2)}}}$ zusammen mit den Biases $(b^{k_2})_{k_2\in\fNat{f^{(2)}}}$ ein äquivalentes Faltungslayer darstellen.
 \end{proof}
 
 \subsection{Varianten der Faltungslayer}
