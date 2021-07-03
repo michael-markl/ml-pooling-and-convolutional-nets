@@ -5,3 +5,4 @@
 {"rule":"ART_ADJ_SOL","sentence":"^\\QBeispiele im Zweidimensionalem Graustufen-Bilder werden bspw. enkodiert als \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q mit \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q schwarz und \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q weiß.\\E$"}
 {"rule":"WHITESPACE_RULE","sentence":"^\\QSchwarz \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q, Weiß \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q.\\E$"}
 {"rule":"WHITESPACE_RULE","sentence":"^\\QDas Input-Signal \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q.\\E$"}
+{"rule":"PUNCTUATION_PARAGRAPH_END","sentence":"^\\QNun können wir mit dem Satz von Fubini die Integrale tauschen und erhalten \\E(?:Dummy|Ina|Jimmy-)[0-9]+$"}

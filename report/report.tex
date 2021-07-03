@@ -337,13 +337,13 @@ Das führt zur verallgemeinerten Definition, die sich nur bei den räumlichen Di
     Inputs $x^{(l-1)}$ des Layers haben $n^{(l-1)}_1\times\cdots\times n^{(l-1)}_d \times f^{(l-1)}$ Einträge.
     Es werden $f^{(l)}$ Kerne der Form $w^{(l),k}$ mit je $m^{(l)}_1\times\cdots\times m^{(l)}_d \times f^{(l-1)}$ Einträgen und Biases $b^{(l),k}\in\R$ für  $k\in \fNat{f^{(l)}}$ gelernt.
     Die räumliche Output-Größe ist $n^{(l)}_i = n^{(l-1)}_i-  m^{(l)}_i + 1$ für $i\in\{1,\dots, d\}$.
-    Wir schreiben $J^{(l)} \coloneqq \bigtimes_{i=1}^d [m^{(l)}_i]$ und $I^{(l)} \coloneqq \bigtimes_{i=1}^d [n^{(l-1)}_i - m_i^{(l)} +1]$.
-    Outputs des Layers sind von der Form $x^{(l)}\in \R^{n^{(l)}\times f^{(l)}}$ und für $i\in I$ und $k\in\fNat{f^{(l)}}$ gilt
+    Wir schreiben $J^{(l)} \coloneqq \bigtimes_{i=1}^d [m^{(l)}_i]$ und $I^{(l)} \coloneqq \bigtimes_{i=1}^d [n^{(l)}_i]$.
+    Outputs des Layers sind von der Form $x^{(l)}\in \R^{n^{(l)}\times f^{(l)}}$ und für $i\in I^{(l)}$ und $k\in\fNat{f^{(l)}}$ gilt
     \begin{align*}
         x^{(l)}_{i,k}
         &=  \sigma^{(l)}\left( (w^{(l),k} \star x^{(l-1)})_{i,0} + b^{(l),k} \right)\\
         &= \sigma^{(l)} \left( 
-            \sum_{j \in J} \sum_{k'\in \fNat{f^{(l-1)}}}
+            \sum_{j \in J^{(l)}} \sum_{k'\in \fNat{f^{(l-1)}}}
             w^{(l),k}_{j,k'} \cdot x^{(l)}_{i+j, k'} + b^{(l), k}
         \right).
     \end{align*}
@@ -384,7 +384,7 @@ Wir betrachten nun Faltungslayer, in denen als Aktivierungsfunktion nur die line
 Das nächste Theorem zeigt, dass man in diesem Fall mehrere in Reihe geschalteten Faltungslayer mit einem einzigen Faltungslayer ersetzen kann.
 Dabei \todo{beschränken wir uns zunächst auf Faltungslayer mit je nur einer Input- und Output-Feature-Map.}
 
-\begin{theorem}[Komposition von eindimensionalen Faltungslayern]
+\begin{theorem}[Komposition von eindimensionalen Faltungslayern]\label{thm:matrix-collapse-linear-conv-layers}
     Seien $w^{(1)}\in\R^{m^{(1)}}$, $w^{(2)}\in\R^{m^{(2)}}, \dots, w^{(L)}\in\R^{m^{(L)}}$ die (einzigen) Kernel von in Reihe geschalteten eindimensionalen Faltungslayern mit Biases $b^{(1)},\dots, b^{(L)}\in\R$ und linearer Aktivierungsfunktionen $\sigma^{(l)}(x) \coloneqq x$ für $l\in\{1,\dots,L\}$.
 
     Dann gibt es ein äquivalentes Netz mit nur einem Faltungslayer mit linearer Aktivierungsfunktion und Kernel $w\in\R^m$ mit $m=\sum_{i=1}^L m_i - (L-1)$.
@@ -432,34 +432,117 @@ Dabei \todo{beschränken wir uns zunächst auf Faltungslayer mit je nur einer In
     Es bleibt zu zeigen, dass $\mathcal{B}\cdot \mathcal{A}$ die von einem Kernel der Länge $m\coloneqq k+l-1$ erzeugte Toeplitz-Matrix ist. 
     Für die $i$-te Zeile dieser Matrix gilt
     \[
-        \begin{aligned}
         (\mathcal{B} \cdot \mathcal{A})_i
-        &= \left(
-            \begin{matrix}
+        = \begin{pmatrix}
                 \smash[b]{\underbrace{\begin{matrix}0 & \cdots & 0\end{matrix}}_{i-1}} & \beta_0 & \beta_1 & \cdots & \beta_{l-1} & 0 & \cdots & 0
-            \end{matrix}
-        \right) \cdot \mathcal{A} \\           
-        &= \left(
-                \begin{matrix}
-                    \beta_0 & \beta_1 & \cdots & \beta_{l-1}
-                \end{matrix}
-            \right) \cdot \left(\begin{matrix}
+            \end{pmatrix} \cdot \mathcal{A}, \\[1em]
+    \]
+    sodass wir lediglich die $l$ Zeilen ab der $i$-ten Zeile von $\mathcal{A}$ betrachten können:
+    \[
+        (\mathcal{B} \cdot \mathcal{A})_i = 
+            \begin{pmatrix}
+                \beta_0 & \beta_1 & \cdots & \beta_{l-1}
+            \end{pmatrix} \cdot \begin{pmatrix}
                 \mathbb{0}_{l\times (i-1)} & \smash[b]{\underbrace{\begin{matrix}
                     \alpha_0 & \cdots & \alpha_{k-1} & 0 & \cdots & 0 \\
                     0 & \ddots & & \ddots  & & \vdots \\
                     \vdots  & & \ddots & & \ddots & 0 \\[4pt]
                     0 & \cdots & 0 & \alpha_0 & \cdots & \alpha_{k-1} \\
             \end{matrix}}_{l + k - 1 = m}} & \mathbb{0}_{l\times (\geq 0)}\\[2em]
-        \end{matrix}\right) \\[2em]
-        &= \left(\begin{matrix}
-            \smash[b]{\underbrace{\begin{matrix}0 & \cdots & 0\end{matrix}}_{i-1}} &
-            \smash[b]{\underbrace{\begin{matrix}\beta_0 \alpha_0 & ~\beta_0 \alpha_1 + \beta_1\alpha_0~ & \cdots & \sum_{j=0}^{l - 1} \beta_j \alpha_{m-1 - j}\end{matrix}}_{= \beta * \alpha \coloneqq w \text{ erzeugender Kernel}}} & 0 & \cdots & 0
-        \end{matrix}\right).\\[2em]
-    \end{aligned}
+        \end{pmatrix}. \\[2em]
     \]
-    \todo{Adjust the lines above and finish up the proof.}
+    Ausgehend von diesem Ausdruck lässt sich ein Eintrag von $\mathcal{B}\cdot \mathcal{A}$ berechnen als
+    \[
+        (\mathcal{B}\cdot \mathcal{A})_{i,j} = \begin{cases}
+            0, & \text{für $j < i$,}\\
+            \sum_{p\in \fNat{l}} \beta_{p} \cdot \alpha_{j - i - p}, & \text{für $i \leq j < i+m$,}\\
+            0, & \text{für $j \geq i+m$,}
+        \end{cases}
+    \]
+    wobei wir wie in Abschnitt~\ref{subsec:convolution} beschrieben die Konvention $\alpha_p = 0$ für $p\notin \fNat{k}$ verwenden.
+    Betrachtet man diesen Ausdruck etwas genauer, so fällt auf, dass die Einträge nur von $i-j$ abhängen und $\mathcal{B}\cdot \mathcal{A}$ somit per Definition eine Toeplitz-Matrix ist.
+    Diese Toeplitz-Matrix wird von dem neuen Kern $w_j \coloneqq \sum_{p\in\fNat{l}} \beta_p \cdot \alpha_{j - p}$ für $j\in\fNat{m}$ erzeugt, wodurch die Behauptung folgt.
 \end{proof}
 
+Dieses Theorem lässt für den eindimensionalen Fall den unmittelbaren Schluss zu, dass es wenig sinnvoll ist mehrere Faltungslayer mit je nur einer Feature-Map mittels linearen Aktivierungsfunktionen in Reihe zu schalten.
+Die Beweisidee stammt dabei von Ovidiu aus~\cite{Calin2020}, wo anhand von Beispielen vorgeschlagen wird, die Matrixform auszunutzen.
+Wir betrachten erneut den Kern, der beim Fusionieren zweier Faltungslayer ensteht.
+Dieser hat die Form $w_j \coloneqq \sum_{p\in\fNat{l}} \beta_p \cdot \alpha_{j-p}$ für $j\in\fNat{m}$.
+Dies entspricht der Faltung von $\beta$ und $\alpha$, also $w_j = (\beta * \alpha)_j$ für $j\in\fNat{m}$.
+Allgemeiner können wir die folgende Beziehung von Kreuzkorrelation und Faltung zeigen:
+\begin{proposition}
+    Für $L^1$-endliche Signale $f,g,h$ gilt $f\star (g \star h) = (f*g)\star h$.
+\end{proposition}
+\begin{proof}
+    Wir setzen zunächst die Definition von Kreuzkorrelation ein und substituieren anschließend $\tau' \mapsto \tau' - \tau$:
+    \begin{align*}
+        (f\star (g\star h))(x)
+        &= \int_\Omega f(\tau) \cdot \int_\Omega g(\tau') \cdot h(x+\tau+\tau')\diff\mu(\tau') \diff \mu(\tau) \\
+        &= \int_\Omega \int_\Omega f(\tau) \cdot g(\tau' - \tau)\cdot h(x+\tau')\diff\mu(\tau') \diff \mu(\tau).
+    \end{align*}
+    Nun können wir mit dem Satz von Fubini die Integrale tauschen und erhalten
+    \begin{align*}
+        (f\star (g\star h))(x)&= \int_\Omega\int_\Omega f(\tau) \cdot g(\tau'-\tau) \diff\mu(\tau) \cdot h(x+\tau')\diff\mu(\tau') \\
+        &= \int_\Omega  (f * g)(\tau')\cdot h(x+\tau') \diff \mu(\tau')
+        = \left( (f * g) \star h \right)(x).\qedhere
+    \end{align*}
+\end{proof}
+
+Damit lässt sich das Resultat des obigen Theorems leicht für mehrdimensionale Layer verallgemeinern.
+Jedoch wollen wir die Aussage nun sogar für mittels linearer Aktivierungsfunktion in Reihe geschalteten Faltungslayern mit beliebiger Anzahl an Feature-Maps beweisen.
+
+\begin{theorem}
+    Sei ein Netz mit $L$ in Reihe geschalteten $d$-dimensionalen Faltungslayern gegeben, deren Aktivierungsfunktionen die lineare Aktivierungsfunktion $\sigma(x) \coloneqq x$ sind.
+
+    Dann gibt es ein äquivalentes Netz mit nur einem Faltungslayer mit linearer Aktivierungsfunktion, $f^{(L)}$ Output-Feature-Maps sowie mit den zugehörigen $f^{(L)}$ Kernel der Form $w\in\R^{m_1\times\cdots\times m_d \times f^{(0)}}$ mit $m_i=\sum_{l=1}^L m^{(l)}_i - (L-1)$.
+\end{theorem}
+\begin{proof}
+    Wir nutzen für das gegebene $L$-Layer-Netz die Notation aus Definition~\ref{def:multi-dimensional-conv-layer}.
+    Wie in Theorem~\ref{thm:matrix-collapse-linear-conv-layers} genügt es, die Aussage nur für den Fall $L=2$ zu zeigen; \todo{der Rest folgt induktiv.}
+
+    \newcommand{\bcdot}{\boldsymbol{\cdot}}
+    Dazu benötigen wir folgende Notation\todo{en}.
+    Definieren wir \[
+        w^{(l), k}_{\bcdot, k'}\coloneqq \left( w_{j,k'}^{(l),k}\right)_{j\in J^{(l)}}
+        \quad \text{und} \quad
+        x^{(l)}_{\bcdot, k} \coloneqq \left( x^{(l)}_{i,k} \right)_{i\in I^{(l)}}
+        \quad \text{für $k\in \fNat{f^{(l)}}, k'\in\fNat{f^{(l-1)}}$},
+    \]
+    so können wir den Output eines Layers $l$ schreiben als 
+    \begin{align*}
+        x^{(l)}_{i, k}
+        &=  \left( w^{(l),k} \star x^{(l-1)}\right)_{i,0} + b^{(l),k}
+        %=  \left( \sum_{\substack{
+        %    j\in J^{(l)}\\
+        %    k'\in \fNat{f^{(l-1)}}
+        %}}  w^{(l),k}_{j,k'} \cdot x^{(l-1)}_{i+j,k'} + b^{(l),k} \right)_{i\in I^{(l)}} \\
+        = \sum_{k'\in \fNat{f^{(l-1)}}}  \left(w^{(l),k}_{\bcdot,k'} \star x^{(l-1)}_{\bcdot,k'} \right)_i + b^{(l),k}
+    \end{align*}
+    für $i\in I^{(l)}, k\in\fNat{f^{(l)}}$.
+    Für den Output von $l=2$ gilt dann für $i_2\in I^{(2)}, k_2\in \fNat{f^{(2)}}$
+    \begin{align*}
+        x^{(2)}_{i_2,k_2}
+        &= \sum_{k_1\in \fNat{f^{(1)}}}  \left(w^{(2),k_2}_{\bcdot,k_1} \star x^{(1)}_{\bcdot,k_1} \right)_{i_2} + b^{(2),k_2} \\
+        &= \sum_{k_1\in \fNat{f^{(1)}}}  \left(w^{(2),k_2}_{\bcdot,k_1} \star \left( 
+%
+            \sum_{k_0\in \fNat{f^{(0)}}}  \left(w^{(1),k_1}_{\bcdot,k_0} \star x^{(0)}_{\bcdot,k_0} \right)_{i_1} + b^{(1),k_1}
+%
+         \right)_{i_1\in I^{(1)}} \right)_{i_2} + b^{(2),k_2}
+    \end{align*}
+    Da Kreuzkorrelation distributiv über $+$ ist, lässt sich der Term mit \[
+        b^{k_2}\coloneqq \sum_{k_1\in\fNat{f^{(1)}}}\sum_{j\in J^{(2)}} w^{(2), k_2}_{j,k_1} \cdot b^{(1),k_1} + b^{(2), k_2}
+    \]
+    \newcommand{\rest}[2]{\left.{#1}\right|_{#2}}
+    und der Schreibweise $\rest{g}{K} \coloneqq (g_i)_{i\in K}$ für $g: \Z^d \rightarrow \R, K\subseteq \Z^d$ vereinfachen zu 
+    \[
+        x^{(2)}_{i_2,k_2} 
+        = \sum_{k_0\in \fNat{f^{(0)}}}\sum_{k_1\in \fNat{f^{(1)}}}  \left(w^{(2),k_2}_{\bcdot,k_1} \star 
+        \rest{\left(w^{(1),k_1}_{\bcdot,k_0} \star x^{(0)}_{\bcdot,k_0} \right)}{I^{(1)}}
+        \right)_{i_2} + b^{k_2}.
+    \]
+
+    \todo{Finish up from here.}
+\end{proof}
 
 \subsection{Varianten der Faltungslayer}
 
