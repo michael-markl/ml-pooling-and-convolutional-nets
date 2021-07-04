@@ -382,7 +382,7 @@ Stattdessen sind die meisten Einträge festgelegt durch $0$-en, andere Einträge
 
 Wir betrachten nun Faltungslayer, in denen als Aktivierungsfunktion nur die lineare Aktivierungsfunktion $\sigma(x) \coloneqq x$ verwendet wird.
 Das nächste Theorem zeigt, dass man in diesem Fall mehrere in Reihe geschalteten Faltungslayer mit einem einzigen Faltungslayer ersetzen kann.
-Dabei \todo{beschränken wir uns zunächst auf Faltungslayer mit je nur einer Input- und Output-Feature-Map.}
+Dabei beschränken wir uns zunächst auf Faltungslayer mit je nur einer Input- und Output-Feature-Map.
 
 \begin{theorem}[Komposition von eindimensionalen Faltungslayern]\label{thm:matrix-collapse-linear-conv-layers}
     Seien $w^{(1)}\in\R^{m^{(1)}}$, $w^{(2)}\in\R^{m^{(2)}}, \dots, w^{(L)}\in\R^{m^{(L)}}$ die (einzigen) Kernel von in Reihe geschalteten eindimensionalen Faltungslayern mit Biases $b^{(1)},\dots, b^{(L)}\in\R$ und linearer Aktivierungsfunktionen $\sigma^{(l)}(x) \coloneqq x$ für $l\in\{1,\dots,L\}$.
@@ -563,13 +563,22 @@ Jedoch wollen wir die Aussage nun sogar für mittels linearer Aktivierungsfunkti
     sodass die Kerne $(w^{k_2})_{k_2\in\fNat{f^{(2)}}}$ zusammen mit den Biases $(b^{k_2})_{k_2\in\fNat{f^{(2)}}}$ ein äquivalentes Faltungslayer darstellen.
 \end{proof}
 
+Wir resümieren, dass es im Eindimensionalen zwar immer von Vorteil ist, aufeinanderfolgende Faltungslayer mit linearer Aktivierungsfunktion zu fusionieren, im Mehrdimensionalen ist dies zwar auch möglich, jedoch womöglich auf Kosten einer deutlich größeren Parameterzahl:
+
+Hat man $L$ zweidimensionale Faltungslayer mit Kernel von $2\times 2$ räumlicher Größe, so ist die Anzahl an Parametern genau $5L$.
+Fusioniert man diese jedoch zu einem einzigen Faltungslayer, so erhält man einen Kern mit räumlicher Größe $(L+1)^2$ und einer Parameterzahl von $L^2 + 2L + 2$.
+
+In der Praxis werden Faltungslayer meist mit einer nicht-linearen Aktivierungsfunktion ausgestattet.
+
 \subsection{Varianten der Faltungslayer}
 
 
 
 \subsection{Äquivarianz}
 
-\todo{Eine wichtige Eigenschaft der den Faltungslayern zugrundeliegenden Kreuzkorrelation ist die sogenannte Äquivarianz bezüglich Translation.
+\todo{
+    
+Eine wichtige Eigenschaft der den Faltungslayern zugrundeliegenden Kreuzkorrelation ist die sogenannte Äquivarianz bezüglich Translation.
 In anderen Worten: Es ist egal, ob zuerst die Kreuzkorrelation bezüglich eines Filters $f$ angewandt wird und anschließend das Ergebnis verschoben wird oder ob zuerst das Eingangssignal verschoben wird und anschließend die Kreuzkorrelation bezüglich $f$ berechnet wird.
 
 \begin{proposition}[Äquivarianz bzgl. Translation]
@@ -582,7 +591,6 @@ In anderen Worten: Es ist egal, ob zuerst die Kreuzkorrelation bezüglich eines 
     $\mathcal{C}(T_a\, g)(x) = \int_{\R^d} f(\tau) \cdot g(x - a + \tau) \diff \tau = \transl{a}{\mathcal{C}(g)}$
 \end{proof}
 
-
 }
 
 
@@ -592,11 +600,6 @@ In anderen Worten: Es ist egal, ob zuerst die Kreuzkorrelation bezüglich eines 
 
 \section{Faltungsnetze}
 
-
-
-\begin{definition}[The Convolution Operation]
-    
-\end{definition}
 
 \clearpage          % neue Seite für Literaturverzeichnis
 \thispagestyle{empty}

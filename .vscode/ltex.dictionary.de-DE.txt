@@ -21,3 +21,4 @@ lernbaren
 Dense-Layer
 lernbare
 Toeplitz-Matrix
+Äquivarianz
