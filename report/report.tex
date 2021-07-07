@@ -1,7 +1,7 @@
 \documentclass[paper=a4, 	% Seitenformat
-		fontsize=11pt, 		% Schriftgr\"o\ss{}e
-		abstracton, 	% mit Abstrakt
-		headsepline, 	% Trennlinie f\"ur die Kopfzeile
+		fontsize=11pt,
+		abstract=true, 	% mit Abstrakt
+		headsepline, 	% Trennlinie für die Kopfzeile
 		notitlepage	% keine extra Titelseite
 		]{scrartcl}
 %\usepackage[a5paper,margin=5mm]{geometry}
@@ -13,10 +13,10 @@
 \usepackage{amssymb}
 \usepackage{amsthm}
 \usepackage{subcaption}
-\captionsetup{justification=centering}
+\captionsetup{justification=centering, format=plain}
 
 
-\usepackage{mathbbol}
+\DeclareMathAlphabet{\mymathbb}{U}{BOONDOX-ds}{m}{n}
 \usepackage{color}
 
 \usepackage{tikz}
@@ -44,6 +44,9 @@
 \newcommand{\transl}[2]{T_{#1}\, #2}
 \newcommand{\fNat}[1]{[ #1 ]}
 
+\newcommand{\diam}{\textnormal{diam}}
+
+\newcommand{\sig}[1]{\mathfrak{S}{\left( #1 \right)}}
 
 \title{Neuronale Faltungsnetze und Pooling}
 \author{Michael Markl}
@@ -59,7 +62,11 @@
 Neuronale Netze werden bereits heutzutage auf zahlreiche Problemstellungen angewandt.
 Dabei ist Computer Vision -- also die Verarbeitung und Analyse von Bildern -- eine der meist genutzten Technologien, die dadurch ermöglicht wird.
 Ein klassisches Problem der Computer Vision ist, ein Bild zu einer bestimmten Kategorie zuzuordnen.
-Bei der Erkennung von handschriftlichen Ziffern hat LeCun in~\cite{LeCun1989} aufgezeigt, dass das Reduzieren eines Netzwerks durch das Teilen von Parametern mehrere Neuronen zwischen zwei Layern die topologische 2D-Struktur von Bildern ausnutzen kann und dadurch die Klassifizierung erheblich verbessern kann.
+
+
+
+Bei der Erkennung von handschriftlichen Ziffern hat LeCun erstmals in~\cite{LeCun1989} aufgezeigt, dass das Reduzieren eines Netzwerks durch das Teilen von Parametern mehrerer Neuronen zwischen zwei Layern die topologische zweidimensionale Struktur von Bildern ausnutzen kann und dadurch die Klassifizierung erheblich verbessern kann.
+In darauffolgenden Experimenten haben LeCun et. al. in~\cite{lecun1998} das neuronale Netz weiter verbessert, sodass sie schließlich mit einem Faltungsnetz namens \emph{LeNet-5} starke Verbesserungen bei der Erkennung von handschriftlichen Ziffern erzielen konnten.
 
 % TODO:
 Diese Arbeit gibt einen Einblick in Theorie und Praxis von Faltungsnetzen sowie die oft dabei verwendeten Pooling-Layer.
@@ -96,8 +103,7 @@ Diese werden oft in der digitalen Signalverarbeitung genutzt, wo man zwischen ko
     Außerdem sind diskrete Signale mit kompaktem Träger $L^1$-endlich.
 \end{proposition}
 \begin{proof}
-    Sei $f$ ein kontinuierliches Energie-Signal mit $f(x) = 0$ für $\norm{x}_{\infty} \geq R$.
-    Sei $\mathbb{1}_R$ die charakteristische Funktion mit $\mathbb{1}_R(x) = 1$ für $\norm{x}_\infty \leq R$ und $\mathbb{1}_R(x) = 0$ sonst.
+    Seien $f$ ein kontinuierliches Energie-Signal mit $f(x) = 0$ für $\norm{x}_{\infty} \geq R$ und $\mathbb{1}_R$ die charakteristische Funktion mit $\mathbb{1}_R(x) = 1$ für $\norm{x}_\infty \leq R$ und $\mathbb{1}_R(x) = 0$ sonst.
     Sei außerdem $\langle \,\cdot\, , \,\cdot\, \rangle_{L_2}$ das Skalarprodukt auf dem Hilbertraum $L^2$.
     Dann gilt mit der Cauchy-Schwarz-Ungleichung
     \[
@@ -149,19 +155,19 @@ Oft wird die Faltung bzw. Kreuzkorrelation so dargestellt, dass der Kern diejeni
     Für $f \star g$ funktionieren die Schritte analog.
 \end{proof}
 
-Im Deep-Learning-Kontext wird meist von Faltung gesprochen, dabei wird aber tatsächlich oft die Kreuzkorrelation gemeint und verwendet.
-\todo{Später werden wir sehen, warum dies keine größeren Auswirkungen auf die Neuronalen Faltungslayer hat.}
-Wir werden daher im Folgenden meist nur die Kreuzkorrelation näher betrachten.
+Im Deep-Learning-Kontext wird meist von Faltung gesprochen, dabei wird aber tat\-säch\-lich oft die Kreuzkorrelation gemeint und verwendet.
+\todo{Später werden wir sehen, warum diese Wahl jedoch meist keine Auswirkungen auf die Neuronalen Faltungslayer hat.}
+Daher wird im Folgenden nur die Kreuzkorrelation näher betrachtet.
 
 Wir betrachten zunächst einige Beispiele dieser Operationen.
 Definiere dazu die Signale
 \begin{align*}
-    f: \R \rightarrow \R, \quad x \mapsto \begin{cases}
+    f: \R \rightarrow \R, \hspace{0.5em} x \mapsto \begin{cases}
         \frac{1}{2} - x, & \text{für $x\in[-\frac{1}{2},\frac{1}{2}]$,}\\
         0, & \text{sonst,}
-    \end{cases} \qquad
-    g: \R \rightarrow \R,\quad x \mapsto \begin{cases}
-        1,& \text{für $x \in [-\frac{1}{2},\frac{1}{2}]$}\\
+    \end{cases} \quad
+    g: \R \rightarrow \R,\hspace{0.5em} x \mapsto \begin{cases}
+        1,& \text{für $x \in [-\frac{1}{2},\frac{1}{2}]$,}\\
         0, & \text{sonst.}
     \end{cases}
 \end{align*}
@@ -183,7 +189,8 @@ Betrachtet man die Kreuzkorrelation von $g$ mit dem Filter $f=(\frac{1}{2}, \fra
 \]
 
 Um Kreuzkorrelation auf Graustufen-Bilder auszuführen, bestimmt man zu\-nächst eine Input-Enkodierung.
-Dabei wird oft eine Matrix $G\in[0,1]^{r\times c}$ gewählt, wobei $r$ die Anzahl an Reihen, $c$ die Anzahl an Spalten und $g_{i,j}$ die \emph{Aktivierung des Pixels} zwischen $0$ und $1$ sind, wobei der Wert~$0$ für Schwarz und der Wert~$1$ für Weiß stehen.
+Dabei wird oft eine Matrix $G\in[0,1]^{r\times c}$ gewählt, wobei $r$ die Anzahl an Reihen, $c$ die Anzahl an Spalten und $g_{i,j}$ die \emph{Aktivierung des Pixels} zwischen~$0$ und~$1$ sind.
+Dabei stehen der Wert~$0$ für Schwarz und der Wert~$1$ für Weiß.
 Der sogenannte \emph{Sobel-Filter} zur Erkennung von horizontalen Kanten hat die Form
 \[
     F = \begin{pmatrix}
@@ -227,8 +234,8 @@ Das Ausgangsbild $G$ hat $28\times 28$ Pixel.
 Wir betrachten zumeist nur solche Pixel von $F\star G$, in denen der gesamte Filter im \glqq relevanten Teil\grqq\ des Inputs, also innerhalb dieser $28\times 28$ Pixel ist.
 Daher hat das Output-Bild in beiden Längen $2$ Pixel weniger als $G$.
 Diese Technik nennt man Kreuzkorrelation \emph{ohne Padding}.
-Allgemeiner: Sei $G\in\R^{n_1\times\cdots \times n_d}$ ein Eingangssignal und $F\in\R^{m_1\times\cdots\times m_d}$ ein Filter mit $n_i \geq m_i$, so hat die Kreuzkorrelation von $F$ und $G$ ohne Padding die Form $H\in\R^{k_1\times\cdots\times k_d}$ mit $k_i = n_i - m_i + 1$. 
-\todo{In Abschnitt bla werden weitere Varianten der Kreuzkorrelation beleuchtet, die bei Faltungslayern zum Einsatz kommen.}
+Allgemeiner definieren wir für beliebige Dimensionen: Sei $G\in\R^{n_1\times\cdots \times n_d}$ ein Eingangssignal und $F\in\R^{m_1\times\cdots\times m_d}$ ein Filter mit $n_i \geq m_i$, so hat die Kreuzkorrelation von $F$ und $G$ ohne Padding die Form $H\in\R^{k_1\times\cdots\times k_d}$ mit $k_i = n_i - m_i + 1$ und $H_{i_1,\dots,i_d} = (F\star G)_{i_1,\dots,i_d}$. 
+In Abschnitt~\ref{subsec:variants-of-cross-corr} werden weitere Varianten der Kreuzkorrelation beleuchtet, die bei Faltungslayern zum Einsatz kommen.
 
 
 
@@ -276,10 +283,11 @@ Trotzdem kann ein einzelnes Faltungslayer mit vergleichsweise kleinem Kern vor a
 
 Da die Kreuzkorrelation prüft, wie sehr sich ein Eingangssignal dem Kern an einer bestimmten Stelle ähnelt, nennen wir den Output $y$ auch oft eine \emph{Feature-Map}.
 Wir können $y$ nämlich auffassen als Karte, auf der man nachsehen kann, wie stark ein Merkmal an einer bestimmten Stelle im Eingangssignal ausgeprägt ist.
+Weil aber der Kern durch Backpropagation gelernt wird, ist es in den meisten Fällen egal ob Kreuzkorrelation oder Faltung verwendet wird, denn das gelernte Signal würde sich nur durch einmaliges \glqq Flippen\grqq\ unterscheiden.
 
 Dabei ist es oftmals interessant, in einem Layer parallel mehrere Feature-Maps zu berechnen, da auch andere Merkmale aus dem Eingangssignal für die Minimierung der Zielfunktion interessant sein können.
 In größeren neuronalen Netzen wird die Verwendung von Faltungslayern aus diesem Grund oft als \emph{Feature-Extraktion} bezeichnet.
-Umgesetzt wird dies, indem mehrere Kernel gleichzeitig auf denselben Eingangsdaten operieren und so mehrere Feature-Maps erzeugen.
+Umgesetzt wird dies, indem mehrere Kerne gleichzeitig auf denselben Eingangsdaten operieren und so mehrere Feature-Maps erzeugen.
 
 Weil man häufig Faltungslayer hintereinander schaltet, müssen diese als Input auch mehrere solcher Feature-Maps akzeptieren.
 Ein weiterer Grund mehrerer Eingangskanäle kann sein, dass die Input-Daten des Netzes bereits mehrere Feature-Maps beinhalten:
@@ -292,7 +300,7 @@ Die vorangegangene Diskussion mündet in der folgenden Definition von eindimensi
     Ein eindimensionales Faltungslayer, welches das $l$-te Layer eines Netzes ist, hat die folgenden Eigenschaften:
     \begin{itemize}
         \item die räumliche Input-Größe $n^{(l-1)}$ und die Anzahl an Input-Feature-Maps $f^{(l-1)}$,
-        \item die räumliche Kernel-Größe $m^{(l)}\leq n^{(l-1)}$ und die Anzahl an Output-Feature-Maps $f^{(l)}$ und
+        \item die räumliche Kern-Größe $m^{(l)}\leq n^{(l-1)}$ und die Anzahl an Output-Feature-Maps $f^{(l)}$ und
         \item die Aktivierungsfunktion $\sigma^{(l)}$.
     \end{itemize}
     Inputs des Layers haben die Form $x^{(l-1)}\in\R^{n^{(l-1)} \times f^{(l-1)}}$.
@@ -320,7 +328,7 @@ Für $d$-dimensionale Eingangssignale $x\in\R^{n_1\times \cdots n_d}$ mit nur ei
     = \sigma\left( \sum_{j_1,\dots,j_d} w_{j_1,\dots,j_d} \cdot x_{i_1+j_1,\dots,i_d+j_d} + b \right).
 \]
 Wird wie zuvor Kreuzkorrelation ohne Padding verwendet, hat die Feature-Map $y$ genau $\prod_{i=1}^d (n_i - m_i +1)$ Einträge.
-Fässt man die Indizes $i_1,\dots,i_d$ und $j_1,\dots,j_d$ zu je einem Vektor $i$ und $j$ zusammen, erhält man mit $J\coloneqq \bigtimes_{i=1}^d [m_i]$ die etwas vereinfachte Schreibweise
+Fasst man die Indizes $i_1,\dots,i_d$ und $j_1,\dots,j_d$ zu je einem Vektor $i$ und $j$ zusammen, erhält man mit $J\coloneqq \bigtimes_{i=1}^d [m_i]$ die etwas vereinfachte Schreibweise
 \[
     y_{i} = \sigma\left((w\star x)_{i} + b\right)
     = \sigma\left( \sum_{j \in J} w_j \cdot x_{i+j} + b \right) \quad \text{für $i\in I\coloneqq \bigtimes_{j=1}^d [n_j - m_j +1]$}.
@@ -331,7 +339,7 @@ Das führt zur verallgemeinerten Definition, die sich nur bei den räumlichen Di
     Ein $d$-dimensionales Faltungslayer, welches das $l$-te Layer eines Netzes ist, hat die folgenden Eigenschaften:
     \begin{itemize}
         \item die räumliche Input-Größe $n^{(l-1)}_1\times\cdots\times n^{(l-1)}_d$ und die Anzahl an Input-Feature-Maps $f^{(l-1)}$,
-        \item die räumliche Kernel-Größe $m^{(l)}_1\times \cdots \times m^{(l)}_d$ mit $m^{(l)}_i \leq n^{(l-1)}_i$ und die Anzahl an Output-Feature-Maps $f^{(l)}$ und
+        \item die räumliche Kern-Größe $m^{(l)}_1\times \cdots \times m^{(l)}_d$ mit $m^{(l)}_i \leq n^{(l-1)}_i$ und die Anzahl an Output-Feature-Maps $f^{(l)}$ und
         \item die Aktivierungsfunktion $\sigma^{(l)}$.
     \end{itemize}
     Inputs $x^{(l-1)}$ des Layers haben $n^{(l-1)}_1\times\cdots\times n^{(l-1)}_d \times f^{(l-1)}$ Einträge.
@@ -385,9 +393,9 @@ Das nächste Theorem zeigt, dass man in diesem Fall mehrere in Reihe geschaltete
 Dabei beschränken wir uns zunächst auf Faltungslayer mit je nur einer Input- und Output-Feature-Map.
 
 \begin{theorem}[Komposition von eindimensionalen Faltungslayern]\label{thm:matrix-collapse-linear-conv-layers}
-    Seien $w^{(1)}\in\R^{m^{(1)}}$, $w^{(2)}\in\R^{m^{(2)}}, \dots, w^{(L)}\in\R^{m^{(L)}}$ die (einzigen) Kernel von in Reihe geschalteten eindimensionalen Faltungslayern mit Biases $b^{(1)},\dots, b^{(L)}\in\R$ und linearer Aktivierungsfunktionen $\sigma^{(l)}(x) \coloneqq x$ für $l\in\{1,\dots,L\}$.
+    Seien $w^{(1)}\in\R^{m^{(1)}}$, $w^{(2)}\in\R^{m^{(2)}}, \dots, w^{(L)}\in\R^{m^{(L)}}$ die (einzigen) Kerne von in Reihe geschalteten eindimensionalen Faltungslayern mit Biases $b^{(1)},\dots, b^{(L)}\in\R$ und linearer Aktivierungsfunktionen $\sigma^{(l)}(x) \coloneqq x$ für $l\in\{1,\dots,L\}$.
 
-    Dann gibt es ein äquivalentes Netz mit nur einem Faltungslayer mit linearer Aktivierungsfunktion und Kernel $w\in\R^m$ mit $m=\sum_{i=1}^L m_i - (L-1)$.
+    Dann gibt es ein äquivalentes Netz mit nur einem Faltungslayer mit linearer Aktivierungsfunktion und Kern $w\in\R^m$ mit $m=\sum_{i=1}^L m_i - (L-1)$.
 \end{theorem}
 \begin{proof}
     Es genügt, die Aussage für $L=2$ zu zeigen, da der Rest per Induktion über $L$ folgt:
@@ -395,9 +403,9 @@ Dabei beschränken wir uns zunächst auf Faltungslayer mit je nur einer Input- u
     Der Induktionsanfang bei $L=1$ gilt trivialerweise.
     Die Aussage sei also für $L$ erfüllt und wir wünschen sie für $L+1$ zu zeigen.
         
-    Nach Induktionsvoraussetzung können die ersten $L$ Layer zu einem äquivalenten Faltungslayer mit Kernel $w'\in \R^{m'}$ mit $m'=\sum_{i=1}^L m_i - (L-1)$ überführt werden.
-    Gilt die Aussage für $L=2$, so können wir dieses Layer mit dem $(L+1)$-ten Layer fusionieren, was ein äquivalentes Faltungslayer mit einem Kernel $w\in\R^m$ ergibt mit $m = m' + m^{(L+1)} - (2-1)$.
-    Dies lässt sich zu $m = \sum_{i=1}^{L+1} m^{(i)} - (L+1 - 1) $ vereinfachen, was die Indutkion beschließt.
+    Nach Induktionsvoraussetzung können die ersten $L$ Layer zu einem äquivalenten Faltungslayer mit Kern $w'\in \R^{m'}$ mit $m'=\sum_{i=1}^L m_i - (L-1)$ überführt werden.
+    Gilt die Aussage für $L=2$, so können wir dieses Layer mit dem $(L+1)$-ten Layer fusionieren, was ein äquivalentes Faltungslayer mit einem Kern $w\in\R^m$ ergibt mit $m = m' + m^{(L+1)} - (2-1)$.
+    Dies lässt sich zu $m = \sum_{i=1}^{L+1} m^{(i)} - (L+1 - 1) $ vereinfachen, was die Induktion beschließt.
     
     Wir zeigen also den Fall $L=2$. Es seien $\alpha\in \R^k$ und $\beta\in\R^l$ die Kerne zweier in Reihe geschalteten Faltungslayer mit zugehörigen Biases $b_1$ und $b_2$.
     Die von $\alpha$ und $\beta$ erzeugten Toeplitz-Matrizen haben die Form
@@ -422,14 +430,14 @@ Dabei beschränken wir uns zunächst auf Faltungslayer mit je nur einer Input- u
         \right),
     \]
     mit $\mathcal{A}\in\R^{n - k + 1\times n}$ und $\mathcal{B}\in \R^{n-k-l+2 \times n-k+1}$.
-    Sind $B_1\coloneqq (b_1,\dots,b_1)$ und $B_2\coloneqq (b_2,\dots,b_2)$ die Bias-Vektoren wie in der Matrix-Form beschrieben, lässt sich der Output des gemeinsamen Netzwerks ausdrücken als
+    Sind $B_1\coloneqq (b_1,\dots,b_1)$ und $B_2\coloneqq (b_2,\dots,b_2)$ die Bias-Vektoren wie in der Matrixform beschrieben, lässt sich der Output des gemeinsamen Netzwerks ausdrücken als
     \[
         \mathcal{B}\cdot \left( \mathcal{A}\cdot x + B_1 \right) + B_2
         = \mathcal{B}\cdot \mathcal{A}\cdot x + \mathcal{B}\cdot B_1 + B_2.
     \]
     Jeder Eintrag des Vektors $(\mathcal{B}\cdot B_1 + B_2)$ stimmt mit der Summe $\sum_{j\in\fNat{l}} \beta_j\cdot b_1 + b_2 \eqqcolon b$ überein, sodass $b$ eine geeignete Wahl als Bias unseres neuen Faltungslayers darstellt.
     
-    Es bleibt zu zeigen, dass $\mathcal{B}\cdot \mathcal{A}$ die von einem Kernel der Länge $m\coloneqq k+l-1$ erzeugte Toeplitz-Matrix ist. 
+    Es bleibt zu zeigen, dass $\mathcal{B}\cdot \mathcal{A}$ die von einem Kern der Länge $m\coloneqq k+l-1$ erzeugte Toeplitz-Matrix ist. 
     Für die $i$-te Zeile dieser Matrix gilt
     \[
         (\mathcal{B} \cdot \mathcal{A})_i
@@ -443,14 +451,15 @@ Dabei beschränken wir uns zunächst auf Faltungslayer mit je nur einer Input- u
             \begin{pmatrix}
                 \beta_0 & \beta_1 & \cdots & \beta_{l-1}
             \end{pmatrix} \cdot \begin{pmatrix}
-                \mathbb{0}_{l\times (i-1)} & \smash[b]{\underbrace{\begin{matrix}
+                \mymathbb{0}_{l\times (i-1)} & \smash[b]{\underbrace{\begin{matrix}
                     \alpha_0 & \cdots & \alpha_{k-1} & 0 & \cdots & 0 \\
                     0 & \ddots & & \ddots  & & \vdots \\
                     \vdots  & & \ddots & & \ddots & 0 \\[4pt]
                     0 & \cdots & 0 & \alpha_0 & \cdots & \alpha_{k-1} \\
-            \end{matrix}}_{l + k - 1 = m}} & \mathbb{0}_{l\times (\geq 0)}\\[2em]
+            \end{matrix}}_{l + k - 1 = m}} & \mymathbb{0}_{l\times (\geq 0)}\\[2em]
         \end{pmatrix}. \\[2em]
     \]
+
     Ausgehend von diesem Ausdruck lässt sich ein Eintrag von $\mathcal{B}\cdot \mathcal{A}$ berechnen als
     \[
         (\mathcal{B}\cdot \mathcal{A})_{i,j} = \begin{cases}
@@ -460,13 +469,13 @@ Dabei beschränken wir uns zunächst auf Faltungslayer mit je nur einer Input- u
         \end{cases}
     \]
     wobei wir wie in Abschnitt~\ref{subsec:convolution} beschrieben die Konvention $\alpha_p = 0$ für $p\notin \fNat{k}$ verwenden.
-    Betrachtet man diesen Ausdruck etwas genauer, so fällt auf, dass die Einträge nur von $i-j$ abhängen und $\mathcal{B}\cdot \mathcal{A}$ somit per Definition eine Toeplitz-Matrix ist.
+    Betrachtet man diesen Term etwas genauer, so fällt auf, dass die Einträge nur von $i-j$ abhängen und $\mathcal{B}\cdot \mathcal{A}$ somit per Definition eine Toeplitz-Matrix ist.
     Diese Toeplitz-Matrix wird von dem neuen Kern $w_j \coloneqq \sum_{p\in\fNat{l}} \beta_p \cdot \alpha_{j - p}$ für $j\in\fNat{m}$ erzeugt, wodurch die Behauptung folgt.
 \end{proof}
 
 Dieses Theorem lässt für den eindimensionalen Fall den unmittelbaren Schluss zu, dass es wenig sinnvoll ist mehrere Faltungslayer mit je nur einer Feature-Map mittels linearen Aktivierungsfunktionen in Reihe zu schalten.
 Die Beweisidee stammt dabei von Ovidiu aus~\cite{Calin2020}, wo anhand von Beispielen vorgeschlagen wird, die Matrixform auszunutzen.
-Wir betrachten erneut den Kern, der beim Fusionieren zweier Faltungslayer ensteht.
+Wir betrachten erneut den Kern, der beim Fusionieren zweier Faltungslayer entsteht.
 Dieser hat die Form $w_j \coloneqq \sum_{p\in\fNat{l}} \beta_p \cdot \alpha_{j-p}$ für $j\in\fNat{m}$.
 Dies entspricht der Faltung von $\beta$ und $\alpha$, also $w_j = (\beta * \alpha)_j$ für $j\in\fNat{m}$.
 Allgemeiner können wir die folgende Beziehung von Kreuzkorrelation und Faltung zeigen:
@@ -494,7 +503,7 @@ Jedoch wollen wir die Aussage nun sogar für mittels linearer Aktivierungsfunkti
 \begin{theorem}
     Sei ein Netz mit $L$ in Reihe geschalteten $d$-dimensionalen Faltungslayern gegeben, deren Aktivierungsfunktionen die lineare Aktivierungsfunktion $\sigma(x) \coloneqq x$ sind.
 
-    Dann gibt es ein äquivalentes Netz mit nur einem Faltungslayer mit linearer Aktivierungsfunktion, $f^{(L)}$ Output-Feature-Maps sowie mit den zugehörigen $f^{(L)}$ Kernel der Form $w\in\R^{m_1\times\cdots\times m_d \times f^{(0)}}$ mit $m_i=\sum_{l=1}^L m^{(l)}_i - (L-1)$.
+    Dann gibt es ein äquivalentes Netz mit nur einem Faltungslayer mit linearer Aktivierungsfunktion, $f^{(L)}$ Output-Feature-Maps sowie mit den zugehörigen $f^{(L)}$ Kernen der Form $w\in\R^{m_1\times\cdots\times m_d \times f^{(0)}}$ mit $m_i=\sum_{l=1}^L m^{(l)}_i - (L-1)$.
 \end{theorem}
 \begin{proof}
     Wir nutzen für das gegebene $L$-Layer-Netz die Notation aus Definition~\ref{def:multi-dimensional-conv-layer}.
@@ -565,18 +574,59 @@ Jedoch wollen wir die Aussage nun sogar für mittels linearer Aktivierungsfunkti
 
 Wir resümieren, dass es im Eindimensionalen zwar immer von Vorteil ist, aufeinanderfolgende Faltungslayer mit linearer Aktivierungsfunktion zu fusionieren, im Mehrdimensionalen ist dies zwar auch möglich, jedoch womöglich auf Kosten einer deutlich größeren Parameterzahl:
 
-Hat man $L$ zweidimensionale Faltungslayer mit Kernel von $2\times 2$ räumlicher Größe, so ist die Anzahl an Parametern genau $5L$.
+Hat man $L$ zweidimensionale Faltungslayer mit Kernen von $2\times 2$ räumlicher Größe, so ist die Anzahl an Parametern genau $5L$.
 Fusioniert man diese jedoch zu einem einzigen Faltungslayer, so erhält man einen Kern mit räumlicher Größe $(L+1)^2$ und einer Parameterzahl von $L^2 + 2L + 2$.
 
 In der Praxis werden Faltungslayer meist mit einer nicht-linearen Aktivierungsfunktion ausgestattet.
 
-\subsection{Varianten der Faltungslayer}
+\subsection{Varianten der Faltungslayer}\label{subsec:variants-of-cross-corr}
+
+In Anwendungen von Faltungslayern werden oft Varianten der diskreten Kreuzkorrelation verwendet.
+Die Wichtigsten sollen in diesem Abschnitt beschrieben werden.
+
+Die \emph{Schrittbreite} $s\in\N$ (engl. \foreignlanguage{english}{stride}) bestimmt, wie viele Pixel der Kern pro Schritt bewegt werden soll.
+Dies lässt sich in einer Formel ausdrücken als 
+\[
+    \left( f \star_s g \right)_i \coloneqq \sum_{j\in \Z^d} f_{j - s\cdot i} \cdot g_j.
+\]
+Für eine Schrittbreite von $s=2$ kann man in Abbildung~\ref{fig:cross-corr-with-stride} ein Beispiel sehen.
+Bei mehrdimensionalen Signalen könnte man auch unterschiedliche Schrittbreiten für jede Dimension verwenden; jedoch kommt dies kaum vor.
+Ein Grund für die Verwendung von Schrittbreiten ist die kleinere Output-Größe.
+Im Vergleich zur \glqq normalen\grqq\ Kreuzkorrelation verkleinert sich die Größe mit Schrittbreite um den Faktor $s^d$.
+
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.2\textwidth]{no_padding_strides_00.pdf}
+    \includegraphics[width=0.2\textwidth]{no_padding_strides_01.pdf}
+    \includegraphics[width=0.2\textwidth]{no_padding_strides_02.pdf}
+    \includegraphics[width=0.2\textwidth]{no_padding_strides_03.pdf}
+    \caption{Zweidimensionale Kreuzkorrelation mit Schrittbreite $2$ und einem Kern der Größe $3\times 3$. {\scriptsize (Grafik aus~\cite{dumoulin2016guide})}}
+    \label{fig:cross-corr-with-stride}
+\end{figure}
+
+Es kann zusätzliches \emph{Padding} verwendet werden, sodass auch Teilüberdeckungen des Kerns mit dem Input genutzt werden.
+Dazu wird das Signal am Rand durch Nullen erweitert und auf dem erweiterten Signal Kreuzkorrelation durchgeführt.
+Ist $p\in\N$ die Anzahl an Nullen, die auf jeder Seite hinzugefügt werden, der Input von der Form $x\in\R^{n_1\times\cdots\times n_d}$, so hat das Output-Signal bei Schrittbreite $1$ die Größe $\bigtimes_{i=1}^d (n_i + 2\cdot p - m_i + 1)$.
+Ist die Kern-Größe $m\times\cdots\times m$ mit $m$ ungerade, so kann das Padding mit $p=\lfloor m/2 \rfloor$ so gewählt werden, dass das Output-Signal die gleiche Größe wie das Input-Signal hat.
+Im Falle $p=m-1$ spricht man von \emph{vollem Padding}, da alle Teilüberdeckungen des Kerns mit dem Eingangssignal genutzt werden.
+In Abbildung~\ref{fig:cross-corr-with-padding} sieht man ein Beispiel von vollem Padding mit einem $3\times 3$ großen Kern.
+
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.2\textwidth]{full_padding_no_strides_00.pdf}
+    \includegraphics[width=0.2\textwidth]{full_padding_no_strides_01.pdf}
+    \includegraphics[width=0.2\textwidth]{full_padding_no_strides_02.pdf}
+    \includegraphics[width=0.2\textwidth]{full_padding_no_strides_03.pdf}
+    \caption{Zweidimensionale Kreuzkorrelation mit vollem Padding und einem Kern der Größe $3\times 3$. {\scriptsize (Grafik aus~\cite{dumoulin2016guide})}}
+    \label{fig:cross-corr-with-padding}
+\end{figure}
+
 
 
 
 \subsection{Äquivarianz}
-
-\todo{
     
 Eine wichtige Eigenschaft der den Faltungslayern zugrundeliegenden Kreuzkorrelation ist die sogenannte Äquivarianz bezüglich Translation.
 In anderen Worten: Es ist egal, ob zuerst die Kreuzkorrelation bezüglich eines Filters $f$ angewandt wird und anschließend das Ergebnis verschoben wird oder ob zuerst das Eingangssignal verschoben wird und anschließend die Kreuzkorrelation bezüglich $f$ berechnet wird.
@@ -586,16 +636,238 @@ In anderen Worten: Es ist egal, ob zuerst die Kreuzkorrelation bezüglich eines 
     Definiere $\mathcal{C}(g)\coloneqq f\star g$ als die Kreuzkorrelation mit $f$ und $\transl{a}{(g)}(x) \coloneqq g(x - a)$ für ein Signal $g$ und $a\in\R^d$.
     Dann gilt \[ \mathcal{C}(\transl{a}{(g)}) = \transl{a}{(\mathcal{C}(g))}. \]
 \end{proposition}
-
 \begin{proof}
     $\mathcal{C}(T_a\, g)(x) = \int_{\R^d} f(\tau) \cdot g(x - a + \tau) \diff \tau = \transl{a}{\mathcal{C}(g)}$
 \end{proof}
 
-}
+Dies ist die fundamentale Eigenschaft, die es Faltungsnetzen ermöglicht, so gut zu generalisieren:
+So ist es Faltungslayern egal, wo genau im Bild ein Merkmal versteckt ist; es wird unabhängig von seinem Ort erkannt, und Orte, an denen ein Merkmal erkannt wird, werden mit einer hohen Aktivierung markiert.
 
+Im krassen Gegensatz dazu ist es Dense-Layern nicht möglich, diese Art der Generalisierung selbständig zu lernen.
+So müsste es für jede möglich Position des Merkmals im Bild Testdaten geben, sodass die entsprechenden Neuronen darauf gelernt werden können.
+Entsprechend neigen Faltungslayer deutlich seltener zu Overfitting. 
 
 \section{Pooling}
 
+Wir widmen uns in diesem Abschnitt dem Pooling sowie deren Anwendung in neuronalen Netzen.
+Zunächst wollen wir begründen, warum Pooling überhaupt notwendig ist.
+
+Ein klassisches Beispiel, in dem neuronale Netze heute genutzt werden, ist die Bildklassifizierung:
+Hier hat man oft hochaufgelöste Input-Daten und man möchte jeden Input eine von wenigen Kategorien zuweisen.
+Oft werden hier Faltungslayer als Teil der Netzarchitektur verwendet, welche Merkmale aus den Daten extrahieren.
+Da der Output des Netzwerks eine geringe Anzahl an Neuronen hat, muss im Laufe des Netzwerks die Dimension reduziert werden.
+Eine Möglichkeit, die räumliche Dimension im Laufe des Netzes zu reduzieren, ist es eine hohe Schrittbreite bei den Faltungslayern zu verwenden.
+Jedoch hat das den Nachteil, dass dies einfach einige möglicherweise wichtige Stellen überspringt, an denen eine hohe Aktivierung vorzufinden wäre.
+
+Eine weitere Möglichkeit die Dimension zu reduzieren sind die sogenannten \emph{Pooling-Layer},
+welche versuchen das Wichtigste aus einer Menge von Inputs in einem einzigen Output zu aggregieren.
+Diese Technik wird vor allem dann eingesetzt, wenn es nicht wichtig ist den exakten Ort eines Merkmals zu kennen, sondern wenn es genügt zu wissen, ob das Merkmal in einer bestimmten Umgebung existiert.
+
+
+\subsection{Pooling von stetigen Funktionen}
+
+Wir beginnen damit, Pooling von allgemeinen stetigen Funktionen einzuführen.
+Dazu benötigt man eine Partition der Definitionsmenge der Funktion sowie eine Aggregationstechnik.
+Die Pooling-Funktion ist dann auf einer Teilmenge $T$ der Partition konstant derjenige Wert, welcher durch die Aggregation von $T$ errechnet wird. 
+
+\begin{definition}
+    Seien $f: K \rightarrow \R$ stetig, $K\subseteq \R^d$ kompakt und $Z=\{T_1,\dots, T_n\}$ eine \emph{endliche Zerlegung} von $K$, d.\,h. $K = T_1 \cup \cdots \cup T_n$ und $T_i \cap T_j = \emptyset$ für $i \neq j$.
+    Für $x\in K$ sei $T(x)$ die Teilmenge $T\in Z$ mit $x\in T$.
+    Die Funktion $\mathcal{P}: K\rightarrow \R$ heißt
+    \begin{itemize}
+        \item \emph{Max-Pooling von $f$}, falls $\mathcal{P}(x) = \mathcal{P}_{\max}^Z(x) \coloneqq \max_{x'\in \overline{T(x)}} f(x')$.
+        \item \emph{Min-Pooling von $f$}, falls $\mathcal{P}(x) = \mathcal{P}_{\min}^Z(x) \coloneqq \min_{x'\in \overline{T(x)}} f(x')$.
+        \item \emph{Average-Pooling von $f$}, falls $\mathcal{P}(x) = \mathcal{P}_{\avg}^Z(x) \coloneqq \frac{1}{\lambda(T)} \int_{T} f(x') \diff x'$ mit $T \coloneqq \overline{T(x)}$.
+    \end{itemize}
+    Dabei bezeichne $\overline{T}$ für die abgeschlossene Hülle von $T\subseteq \R^d$.
+\end{definition}
+
+Man bemerke, dass Max- und Min-Pooling stets wohldefiniert ist: Für $x\in K$ ist die Menge $\overline{T(x)}$ kompakt, sodass $f$ nach dem Satz von Weierstraß darauf sein Minimum und sein Maximum annimmt.
+Fordert man $\lambda\left( \overline{T_i}\right) > 0$ für $i\in\{ 1, \dots, n\}$, so ist auch Average-Pooling wohldefiniert.
+
+\begin{figure}
+    \centering
+    \input{pooling.pdf_tex}
+    \caption{Max- und Min-Pooling für $f:[a,b]\rightarrow\R$ bei äquidistanter Zerlegung.
+    {\scriptsize (Grafik angepasst aus~\cite{Calin2020})}}
+    \label{fig:equidistant-pooling}
+\end{figure}
+
+Ein Beispiel von Min- und Max-Pooling einer eindimensionalen Funktion $f:[a,b]\rightarrow \R$ kann man in Abbildung~\ref{fig:equidistant-pooling} sehen.
+
+Das folgende Theorem soll zeigen, dass die oben definierten Pooling-Funktionen gute Approximierer der ursprünglichen Funktion sind.
+
+\begin{theorem}[Approximationsgüte von Pooling]
+    Sei $f:K \rightarrow \R$ stetig mit $K\subseteq \R^d$ kompakt und sei $(Z_n)_{n\in\N}$ eine erschöpfende Folge von endlichen Zerlegungen von $K$,~d.\,h. 
+    \[
+        \max_{T\in Z_n} \diam(T) \xrightarrow{n\rightarrow\infty} 0 \qquad \text{mit $\diam(T)\coloneqq \sup_{x,y\in T} \norm{x - y}$},
+    \]
+    so konvergieren die Folgen $(\mathcal{P}^{Z_n}_{\max})_n$ und $(\mathcal{P}^{Z_n}_{\min})_n$ gleichmäßig gegen $f$.
+    Ist $\mathcal{P}^{Z_n}_{\avg}$ wohldefiniert für alle $n\in\N$, so konvergiert auch $(\mathcal{P}^{Z_n}_{\avg})_n$ gleichmäßig gegen $f$.
+\end{theorem}
+\begin{proof}
+    Wir zeigen die Konvergenz zunächst für Max-Pooling; für Min-Pooling ist der Beweis analog zu führen.
+    Wir wollen also die folgende Aussage zeigen:
+    \[\forall \varepsilon > 0 ~~ \exists N\in\N ~~ \forall n\geq N:~~\norm{\mathcal{P}^{Z_n}_{\max} - f}_{\infty} < \varepsilon.\]
+    Sei $\varepsilon > 0$ beliebig. 
+    Da $f$ stetig und $K$ kompakt sind, ist $f$ sogar gleichmäßig stetig.
+    Daher existiert ein $\delta>0$ mit $\norm{f(x)- f(y)} < \varepsilon$ für alle $x,y\in K$ mit $\norm{x-y}< \delta$.
+
+    Weil die Folge $(Z_n)_n$ erschöpfend ist, gibt es eine Zahl $N\in\N$, sodass $\diam(T) < \delta$ für alle $n\geq N$ und $T\in Z_n$ gilt.
+    Seien $n\geq N, T\in Z_n$ und $x\in T$. Mit $y\in\arg\max_{y\in\overline{T}} f(y)$ gilt dann wegen $\norm{x-y} \leq \diam(T) < \delta$ auch
+    \[
+        \abs{\mathcal{P}_{\max}^{Z_n}(x) - f(x)} = \abs{f(y) - f(x)}  < \varepsilon.
+    \]
+
+    Es bleibt zu zeigen, dass im Falle der Wohldefiniertheit auch Average-Pooling gleich\-mäßig gegen $f$ konvergiert.
+    Es gilt jedoch für $x\in K$ und $T_n\in Z_n$ mit $x\in T_n$
+    \begin{align*}
+        \mathcal{P}^{Z_n}_{\avg}(x) = \frac{1}{\lambda\left(\overline{T_n}\right)} \int_{\overline{T_n}} f(x') \diff x'
+        \in &\frac{1}{\lambda\left(\overline{T_n}\right)}\cdot \left[ \int_{\overline{T_n}} \mathcal{P}^{Z_n}_{\min}(x') \diff x', \int_{\overline{T_n}} \mathcal{P}^{Z_n}_{\max}(x') \diff x'  \right] \\
+        &= \left[ \mathcal{P}^{Z_n}_{\min}(x), \mathcal{P}^{Z_n}_{\max}(x)  \right].
+    \end{align*}
+    Das heißt, für alle $x\in K$ existiert ein $\alpha\in[0,1]$ mit $\mathcal{P}^{Z_n}_{\avg}(x) = \alpha \mathcal{P}^{Z_n}_{\min}(x) + (1-\alpha)  \mathcal{P}^{Z_n}_{\max}(x)$.
+    Daher lässt sich unter Verwendung der Dreiecksungleichung und der gleichmäßigen Konvergenz von $(\mathcal{P}^{Z_n}_{\max})_n$ und $(\mathcal{P}^{Z_n}_{\min})_n$ die gleichmäßige Konvergenz von  $(\mathcal{P}^{Z_n}_{\avg})_n$ zeigen:
+
+    Sei $N$ so groß, dass $\Vert\mathcal{P}^{Z_n}_{\max} - f\Vert_{\infty} < \varepsilon / 2$ und $\Vert\mathcal{P}^{Z_n}_{\min} - f\Vert_{\infty} < \varepsilon / 2$ für alle $n \geq N$ gelten.
+    Dann folgt die gewünschte Abschätzung:
+    \begin{align*}
+        \abs{\mathcal{P}_{\avg}^{Z_n}(x) - f(x)}
+        &\leq \alpha \cdot \abs{\mathcal{P}_{\max}^{Z_n}(x) - f(x)} + (1-\alpha) \cdot \abs{\mathcal{P}_{\min}^{Z_n}(x) - f(x)} \\
+        &\leq\abs{\mathcal{P}_{\max}^{Z_n}(x) - f(x)} + \abs{\mathcal{P}_{\min}^{Z_n}(x) - f(x)} 
+        < \frac{\varepsilon}{2} + \frac{\varepsilon}{2} = \varepsilon. \qedhere
+    \end{align*}
+\end{proof}
+
+Es sei angemerkt, dass für ein $d$-dimensionales Hyperrechteck als Definitionsmenge $K$ die Folge $(Z_n)_n$, wobei $Z_n$ jede Dimension in $n$ äquidistante Teilintervalle aufteilt und $Z_n$ so aus $d^n$ Hyperrechtecken besteht, eine erschöpfende Zerteilungsfolge ist. 
+
+
+\subsection{Pooling-Layer}
+
+\begin{definition}[Pooling-Layer]
+    Ein \emph{Pooling-Layer}, welches das $l$-te Layer eines Netzes ist, hat eine fest vorgegebene Partition $\mathcal{Q}$ der Inputs $(x^{(l-1)}_j)_{j \in J}$ in $N$ Klassen, d.\,h. $\mathcal{Q}=\{ Q_1,\dots,Q_N \}\subseteq 2^J$ mit $\bigcup_{i=1}^N Q_i = J$ und $Q_i\cap Q_j = \emptyset$ für $i\neq j$.
+    Das Pooling-Layer hat $N$ Outputs $(x^{(l)}_i)_{i\in\{1,\dots, N\}}$. Man spricht von einem 
+    \begin{itemize}
+    \item \emph{Max-Pooling-Layer}, falls $x^{(l)}_i = \max_{ j\in Q_i } x_j$ für $i\in\{1,\dots,N\}$ gilt,
+    \item \emph{Min-Pooling-Layer}, falls $x^{(l)}_i = \min_{ j\in Q_i } x_j$ für $i\in\{1,\dots,N\}$ gilt,
+    \item \emph{Average-Pooling-Layer}, falls $x^{(l)}_i = \frac{1}{\abs{Q_i}} \sum_{j\in Q_i} x_j$ für $i\in\{1,\dots,N\}$ gilt.
+    \end{itemize}
+
+\end{definition}
+
+
+\begin{figure}
+    \centering
+    \begin{minipage}{.45\textwidth}
+      \centering
+      \input{pooling-layer.tex}
+      \captionof{figure}{Ein Max-Pooling-Layer mit $N$ Klassen mit je $p$ Input Neuronen.}
+      \label{fig:abstract-pooling-layer}
+    \end{minipage}%
+    \begin{minipage}{.55\textwidth}
+        \centering
+        \input{pooling-mnist.pdf_tex}
+        \captionof{figure}{Zwei aufeinanderfolgende Pooling-Layer je mit Klassen der Größe $2\times 2$.\\
+        {\scriptsize (Grafik angepasst aus~\cite{Calin2020})}}
+        \label{fig:pooling-mnist}
+    \end{minipage}
+\end{figure}
+
+In Abbildung~\ref{fig:abstract-pooling-layer} sieht man ein beispielhaftes Max-Pooling-Layer mit $N$ Klassen und je $p$ Inputs.
+
+Gibt es eine vordefinierte räumliche Struktur der Inputs, wie etwa die zweidimensionale Anordnung von Bildern, so werden meist Klassen gebildet, indem man mehrere nebeneinander befindliche Inputs zu einem Hyperwürfel bzw. Quadrat von fester Größe zusammenfasst.
+Dadurch bleibt die räumliche Struktur erhalten.
+Für zweidimensionale Inputs mit $n_1\times n_2 \times f$ Einträgen sind die Klassen eines $(p_1\times p_2)$-Pooling-Layers mit $p_1 | n_1$ und $p_2 | n_2$ definiert als
+\[
+    \mathcal{Q} = \left\{
+        \{ (q_1 + i_1, q_2 + i_2, k) \mid i_1\in\fNat{p_1}, i_2\in\fNat{p_2} \}
+        ~\middle|~
+        q_1 \in \fNat{n_1 / p_1}, q_2\in \fNat{ n_1 / p_1 }, k\in\fNat{f}
+        \right\}.
+\]
+Dies lässt sich auf natürliche Weise für mehrdimensionale Inputs verallgemeinern.
+In Abbildung~\ref{fig:pooling-mnist} erkennt man wie zwei aufeinanderfolgende ($2\times 2$)-Pooling-Layer die räumliche Dimension von $28\times 28$ auf $7\times 7$, also um einen Faktor von $16$ reduzieren.
+
+
+Abschließend lässt sich das Pooling-Layer noch hinsichtlich seiner Informationsdarstellung analysieren.
+Wir folgen dabei den in~\cite[Kapitel~11]{Calin2020} vorgestellten Konzepten und notieren $\sig{X}$ als die von einer Zufallsvariablen $X$ erzeugten $\sigma$-Algebra.
+
+
+\begin{proposition}[Informationsdarstellung des Pooling-Layer]
+    Seien $X_1,\dots,X_n$ die Zufallsvariablen der Inputs und $Y_1,\dots,Y_N$ die Zufallsvariablen des Outputs eines Max-Pooling-Layer, die durch $Y_i\coloneqq \max_{j \in Q_i} X_j$ gegeben sind.
+    Dann gilt
+    \[
+      \sig{Y} \coloneqq \sig{Y_1,\dots,Y_N}\subseteq \bigcap_{j_1\in Q_1,\dots, j_N\in Q_N} \sig{X_{j_1}, \dots, X_{j_N}}  .
+    \]
+    Die Aussage gilt auch für Min-Pooling-Layer, wofür $Y_i \coloneqq \min_{j\in Q_i} X_j$ definiert wird.
+\end{proposition}
+\begin{proof}
+    Wir konzentrieren uns zunächst auf das Max-Pooling-Layer.
+    Dazu zeigen wir $\sig{Y_i} \subseteq \bigcap_{j\in Q_i} \sig{X_i}$ für alle $i\in\{1,\dots,N\}$.
+    Dafür genügt es, dass der Generator $\{ Y^{-1}((-\infty, b]) \mid b\in\R \}$ der $\sigma$-Algebra $\sig{Y_i}$ in der $\sigma$-Algebra $\bigcap_{j\in Q_i}\sig{X_i}$ enthalten ist.
+    Dies lässt sich wie folgt nachvollziehen:
+    \[
+        Y_i^{-1}((-\infty, b])
+        = \{ \omega \mid Y_i(w) \leq b \}
+        = \bigcap_{j\in Q_i} \{\omega\mid X_j(\omega) \leq b\}
+        \in \bigcap_{j\in Q_i} \sig{X_j}.
+    \]
+    Aufgrund der Monotonie von $\mathfrak{S}$ folgt $\sig{Y} = \sig{\bigcup_{i=1}^N \sig{Y_i} }\subseteq \sig{ \bigcup_{i=1}^N \bigcap_{j\in Q_i} \sig{X_j} }$.
+    Für allgemeine Mengen $(A_j)_{j\in\{1,\dots,n\}}$ gilt die Gleichung
+    \[
+        \left(\bigcap_{j\in Q_1} A_j\right) 
+        \cup \cdots \cup 
+        \left(\bigcap_{j\in Q_N} A_j\right) 
+        = \bigcap_{j_1\in Q_1, \dots, j_N\in Q_N} 
+        \left( 
+            A_{j_1} \cup \cdots \cup A_{j_N}
+        \right).
+    \]
+
+    Wendet man diese Gleichheit auf die vorherige Teilmengenbeziehung an, erhält man
+    \[
+        \sig{Y} \subseteq 
+        \sig{
+        \bigcap_{j_1\in Q_1, \dots, j_N\in Q_N} 
+        \bigcup_{j=1}^N \sig{X_{j_i}}
+        }
+        =
+        \bigcap_{j_1\in Q_1, \dots, j_N\in Q_N} 
+        \sig{
+        \bigcup_{j=1}^N \sig{X_{j_i}}
+        },
+    \]
+    wodurch die Behauptung folgt.
+    Der Beweis für Min-Pooling-Layer funktioniert analog, wobei man als Generator $\{ Y^{-1}([b,\infty)) \mid b\in\R\}$ benutzt.
+\end{proof}
+
+Wir können die vorherige Aussage wie folgt interpretieren:
+Wählt man aus jeder Klasse~$i$ ein beliebiges Input Neuron $X_{j_i}, j_i \in Q_i$, so sind die Ereignisse, die durch den Output des Layers beobachtet werden können, durch solche Ereignisse beschränkt, die aufgrund der so ausgewählten Inputs $X_{j_1},\dots, X_{j_N}$ entstehen können.
+
+\subsection{Translationsinvarianz}
+
+Eine Eigenschaft, die man in Bezug auf Pooling-Layer gerne hätte, wäre eine sogenannte \emph{lokale Translationsinvarianz}.
+\begin{definition}
+    Sei $f: \R^d \rightarrow \R$ stetig.
+    Der Operator $\mathcal{P}$ heißt \emph{lokal translationsinvariant bezüglich $f$}, falls ein $\delta > 0$ existiert mit $\mathcal{P} ( T_a ( f ) ) = \mathcal{P} ( f )$ für alle $a\in\R^d$ mit $\norm{a} \leq \delta$.
+\end{definition}
+
+Diese würde neuronalen Netze zur Bildklassifizierung, welche Pooling-Layer benutzen, ermöglichen, kleine Verschiebungen des Input-Bildes zu ignorieren.
+
+Ovidiu behauptet in~\cite[Proposition~15.2.1]{Calin2020} die folgende Aussage:
+\begin{proposition}[{\cite[Proposition~15.2.1]{Calin2020}}]
+    Sei $f: \R \rightarrow \R$ eine stetige Funktion.
+    Es gibt eine Zerlegung $Z$ von $\R$, sodass die Operation $\mathcal{P}^Z_{\max}$, die einer Funktion $g$ das zugehörige Max-Pooling bezüglich $g$ zuweist, lokal translationsinvariant ist.
+\end{proposition}
+
+Leider beruht der Beweis dieser Aussage auf einer falschen Annahme:
+So möchte Ovidiu eine Partition von Intervallen der Form $[x_i, x_{i+1})$ wählen, sodass sich die Maxima von ${f}\vert_{[x_i, x_{i+1})}$ innerhalb des offenen Intervalls $(x_i, x_{i+1})$ befinden.
+Dies ist für strikt monoton fallende Funktionen nicht möglich.
+Außerdem ist die Beschreibung der Partition mit endlichen Intervallen der beschriebenen Form in Ovidius Beweis nicht überzeugend.
+Geht man davon aus, dass $Z$ eine nicht-triviale Zerlegung aus Intervallen sein soll, so stellt jede strikt monoton wachsende Funktion $f$ ein Gegenbeispiel der Proposition dar.
+
+Tatsächlich gibt es auch in der Praxis Untersuchungen, wonach die traditionellen Faltungsnetze aufgrund der Pooling-Layer nicht lokal translationsinvariant sind.
+Zhang hat in~\cite{zhang2019shiftinvar} untersucht wie Alias-Effekte, die durch das Downsampling von Pooling-Layern erzeugt werden, verringert werden können, um so eine höhere Stabilität des Netzes gegenüber lokaler Translation zu erzeugen.
 
 
 \section{Faltungsnetze}

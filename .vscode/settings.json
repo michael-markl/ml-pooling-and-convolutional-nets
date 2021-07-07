@@ -1,8 +1,12 @@
 {
     "python.pythonPath": "/home/michael/.local/share/virtualenvs/ml-pooling-and-convolutional-nets-OXGwtTor/bin/python",
+    "ltex.additionalRules.enablePickyRules": true,
     "latex-workshop.latex.outDir": "%DIR%/out",
     "latex-workshop.latex.bibDirs": [
         "%DIR%",
         "../"
-    ]
+    ],
+    "ltex.latex.commands": {
+        "\\todo{}": "ignore"
+    }
 }

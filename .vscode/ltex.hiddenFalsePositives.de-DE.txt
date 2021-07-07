@@ -6,3 +6,8 @@
 {"rule":"WHITESPACE_RULE","sentence":"^\\QSchwarz \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q, Weiß \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q.\\E$"}
 {"rule":"WHITESPACE_RULE","sentence":"^\\QDas Input-Signal \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q.\\E$"}
 {"rule":"PUNCTUATION_PARAGRAPH_END","sentence":"^\\QNun können wir mit dem Satz von Fubini die Integrale tauschen und erhalten \\E(?:Dummy|Ina|Jimmy-)[0-9]+$"}
+{"rule":"DE_CASE","sentence":"^\\Q(Grafik aus \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q) Es kann zusätzliches Padding verwendet werden, sodass auch Teilüberdeckungen des Kernel mit dem Input erlaubt werden: Zweidimensionale Kreuzkorrelation mit vollem Padding und einem Kern der Größe \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q.\\E$"}
+{"rule":"FRAGEZEICHEN_STATT_PUNKT","sentence":"^\\QIst die Kern-Größe \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q mit \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q ungerade, so kann das Padding mit \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q so gewählt werden, dass das Output-Signal die gleiche Größe wie das Input-Signal hat.\\E$"}
+{"rule":"GERMAN_SPELLER_RULE","sentence":"^\\Q[prefix=tikz/]\\E$"}
+{"rule":"DE_CASE","sentence":"^\\QNeuronale Faltungsnetze und Pooling Michael Markl 25. Juni 2021 Mathematische Aspekte des Maschinellen Lernens Seminar bei Prof. Dr. Stykel\\E$"}
+{"rule":"PUNCTUATION_PARAGRAPH_END","sentence":"^\\QDann folgt die gewünschte Abschätzung: \\E(?:Dummy|Ina|Jimmy-)[0-9]+$"}
