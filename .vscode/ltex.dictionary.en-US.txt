@@ -1,2 +1,5 @@
 Connectionism
 LeCun
+CNNs
+Depthwise
+Multi-Layer-Perzeptron

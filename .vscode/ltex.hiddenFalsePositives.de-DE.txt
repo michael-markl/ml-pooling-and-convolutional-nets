@@ -11,3 +11,4 @@
 {"rule":"GERMAN_SPELLER_RULE","sentence":"^\\Q[prefix=tikz/]\\E$"}
 {"rule":"DE_CASE","sentence":"^\\QNeuronale Faltungsnetze und Pooling Michael Markl 25. Juni 2021 Mathematische Aspekte des Maschinellen Lernens Seminar bei Prof. Dr. Stykel\\E$"}
 {"rule":"PUNCTUATION_PARAGRAPH_END","sentence":"^\\QDann folgt die gewünschte Abschätzung: \\E(?:Dummy|Ina|Jimmy-)[0-9]+$"}
+{"rule":"DE_CASE","sentence":"^\\Q[] Das LeNet-5 von LeCun et al. in \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q, angewandt auf die MNIST-Datenbank.\\E$"}

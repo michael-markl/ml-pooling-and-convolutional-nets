@@ -5,7 +5,7 @@
 		notitlepage	% keine extra Titelseite
 		]{scrartcl}
 %\usepackage[a5paper,margin=5mm]{geometry}
-
+\usepackage[a4paper, left=3cm, right=3cm, top=4cm, bottom=4cm, footskip=2cm]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage[english, ngerman]{babel}
 \usepackage{mathtools}
@@ -36,6 +36,7 @@
 \newcommand{\N}{\mathbb{N}}
 \newcommand{\diff}{\,\textrm{d}}
 \newcommand{\todo}[1]{{\color{red} #1}}
+\newcommand{\bcdot}{\boldsymbol{\cdot}}
 
 \newcommand{\norm}[1]{\left\lVert#1\right\rVert}
 \newcommand{\abs}[1]{\left\lvert#1\right\rvert}
@@ -63,12 +64,18 @@ Neuronale Netze werden bereits heutzutage auf zahlreiche Problemstellungen angew
 Dabei ist Computer Vision -- also die Verarbeitung und Analyse von Bildern -- eine der meist genutzten Technologien, die dadurch ermöglicht wird.
 Ein klassisches Problem der Computer Vision ist, ein Bild zu einer bestimmten Kategorie zuzuordnen.
 
+Die Inspiration von neuronalen Faltungsnetzen (engl. \foreignlanguage{english}{Convolutional Neural Networks}) kommt von dem Teil unseres Gehirns, der für das Sehen bzw. genauer für das Verarbeiten von wahrgenommenen Lichtsignale verantwortlich ist: dem visuellen Cortex.
+Hubel und Wiesel haben in~\cite{Hubel1959,Hubel1962} mit einem Experiment an Katzen untersucht, wie einzelne Neuronen des visuellen Cortex, die mit Mikro-Elektroden abgehört wurden, auf bestimmte Lichtreize reagieren.
+Viele Neuronen, sogenannte \emph{\foreignlanguage{english}{Simple Cells}}, zeichnen sich durch ihr lokales rezeptives Feld aus.
+Das bedeutet, dass ein Neuron nur auf eine lokale Umgebung des ursprünglichen Bildes reagiert.
+Weiter hat ein solches lokales rezeptives Feld \emph{erregende} und \emph{hemmende} Regionen.
+Bei Lichtsignalen, die sowohl erregende als auch hemmende Regionen bedecken, zeigten die Neuronen keine Aktivierung.
+Dadurch ist es \foreignlanguage{english}{Simple Cells} möglich, z.\,B. auf Balken nur mit einer bestimmten Rotation zu reagieren.
 
 
-Bei der Erkennung von handschriftlichen Ziffern hat LeCun erstmals in~\cite{LeCun1989} aufgezeigt, dass das Reduzieren eines Netzwerks durch das Teilen von Parametern mehrerer Neuronen zwischen zwei Layern die topologische zweidimensionale Struktur von Bildern ausnutzen kann und dadurch die Klassifizierung erheblich verbessern kann.
-In darauffolgenden Experimenten haben LeCun et. al. in~\cite{lecun1998} das neuronale Netz weiter verbessert, sodass sie schließlich mit einem Faltungsnetz namens \emph{LeNet-5} starke Verbesserungen bei der Erkennung von handschriftlichen Ziffern erzielen konnten.
+Bei der Erkennung von handschriftlichen Ziffern hat LeCun erstmals in~\cite{LeCun1989} aufgezeigt, dass das Teilen von Parametern mehrerer Neuronen zwischen zwei Layern die topologische zweidimensionale Struktur von Bildern ausnutzen kann und dadurch die Klassifizierung verbessern kann.
+In darauffolgenden Experimenten haben LeCun et.\,al. in~\cite{lecun1998} mit dem Faltungsnetz namens \emph{LeNet-5} weitere Verbesserungen bei der Erkennung von handschriftlichen Ziffern erzielt.
 
-% TODO:
 Diese Arbeit gibt einen Einblick in Theorie und Praxis von Faltungsnetzen sowie die oft dabei verwendeten Pooling-Layer.
 Als Grundlagen werden die Werke von Ian Goodfellow et al. in~\cite[Kapitel~9]{Goodfellow-et-al-2016} sowie von Ovidiu Calin in~\cite[Kapitel~15,16]{Calin2020} herangezogen.
 
@@ -134,7 +141,7 @@ Es gilt nämlich \[
 \]
 Ist der Kern \emph{symmetrisch}, gilt also $f(x) = f(-x)$ für alle $x\in\Omega$, so stimmt Kreuzkorrelation mit Faltung überein.
 Durch das \glqq Flippen\grqq\ des Kerns wird die Faltungsoperation kommutativ, was für die Kreuzkorrelation nicht gilt.
-Oft wird die Faltung bzw. Kreuzkorrelation so dargestellt, dass der Kern diejenige Funktion ist, welche verschoben und gegebenenfalls geflippt wird:
+Oft werden Faltung und Kreuzkorrelation so dargestellt, dass der Kern die verschobene und ggf. geflippte Funktion ist:
 \[
     (f*g)(x) = \int_\Omega f(x - \tau) \cdot g(\tau)\diff\mu(\tau), \quad
     (f\star g)(x) = \int_\Omega f(\tau - x) \cdot g(\tau) \diff\mu(\tau).
@@ -156,7 +163,7 @@ Oft wird die Faltung bzw. Kreuzkorrelation so dargestellt, dass der Kern diejeni
 \end{proof}
 
 Im Deep-Learning-Kontext wird meist von Faltung gesprochen, dabei wird aber tat\-säch\-lich oft die Kreuzkorrelation gemeint und verwendet.
-\todo{Später werden wir sehen, warum diese Wahl jedoch meist keine Auswirkungen auf die Neuronalen Faltungslayer hat.}
+Später werden wir sehen, warum diese Wahl jedoch meist keine Auswirkungen auf die Neuronalen Faltungslayer hat.
 Daher wird im Folgenden nur die Kreuzkorrelation näher betrachtet.
 
 Wir betrachten zunächst einige Beispiele dieser Operationen.
@@ -171,8 +178,22 @@ Definiere dazu die Signale
         0, & \text{sonst.}
     \end{cases}
 \end{align*}
+Diese Signale sowie deren Faltung $f * g$ und deren Kreuzkorrelation $f\star g$ kann man in Abbildung~\ref{fig:one-dim-cont-conv} sehen.
+Dabei kann man sich vorstellen, dass der Graph von $f \star g$ durch das Schieben des Filters $f$ über das Signal $g$ von links nach rechts entsteht und dabei zu jedem Zeitpunkt $x$ der Wert des Integrals -- also der Flächeninhalt des Schnittes von Dreieck und Rechteck -- als $(f\star g)(x)$ vermerkt wird.
+Bei der Faltung wird zusätzlich zu Beginn der Filter an der $y$-Achse gespiegelt.
 
-In Abbildung~\todo{figure-a} kann man die Faltung $f * g$ der beiden Signale sehen, in Abbildung~\todo{figure-b} die Kreuzkorrelation~$f\star g$.
+\begin{figure}
+    \begin{subfigure}[c]{0.5\textwidth}
+        \includegraphics[width=\textwidth]{g.png}
+    \end{subfigure}%
+    \begin{subfigure}[c]{0.5\textwidth}
+        \includegraphics[width=\textwidth]{corrs.png}
+    \end{subfigure}
+    \caption{
+        Die Kreuzkorrelation und Faltung von zwei kontinuierlichen, eindimensionalen Signalen.
+    }
+    \label{fig:one-dim-cont-conv}
+\end{figure}
 
 
 In Anwendungen werden meist diskrete Signale mit kompaktem Träger betrachtet.
@@ -316,8 +337,6 @@ Die vorangegangene Diskussion mündet in der folgenden Definition von eindimensi
         \right).
     \end{align*}
 \end{definition}
-
-\todo{Maybe add another figure with multiple input and output feature maps}
 
 \subsection{Mehrdimensionale Faltungslayer}
 
@@ -474,7 +493,7 @@ Dabei beschränken wir uns zunächst auf Faltungslayer mit je nur einer Input- u
 \end{proof}
 
 Dieses Theorem lässt für den eindimensionalen Fall den unmittelbaren Schluss zu, dass es wenig sinnvoll ist mehrere Faltungslayer mit je nur einer Feature-Map mittels linearen Aktivierungsfunktionen in Reihe zu schalten.
-Die Beweisidee stammt dabei von Ovidiu aus~\cite{Calin2020}, wo anhand von Beispielen vorgeschlagen wird, die Matrixform auszunutzen.
+Die Beweisidee von Theorem~\ref{thm:matrix-collapse-linear-conv-layers} stammt dabei von Calin aus~\cite{Calin2020}, der vorschlägt, die Matrixform auszunutzen.
 Wir betrachten erneut den Kern, der beim Fusionieren zweier Faltungslayer entsteht.
 Dieser hat die Form $w_j \coloneqq \sum_{p\in\fNat{l}} \beta_p \cdot \alpha_{j-p}$ für $j\in\fNat{m}$.
 Dies entspricht der Faltung von $\beta$ und $\alpha$, also $w_j = (\beta * \alpha)_j$ für $j\in\fNat{m}$.
@@ -509,7 +528,6 @@ Jedoch wollen wir die Aussage nun sogar für mittels linearer Aktivierungsfunkti
     Wir nutzen für das gegebene $L$-Layer-Netz die Notation aus Definition~\ref{def:multi-dimensional-conv-layer}.
     Wie in Theorem~\ref{thm:matrix-collapse-linear-conv-layers} genügt es, die Aussage nur für den Fall $L=2$ zu zeigen; der Rest folgt auch hier induktiv.
 
-    \newcommand{\bcdot}{\boldsymbol{\cdot}}
     Dazu benötigen wir folgende Notationen.
     Definieren wir \[
         w^{(l), k}_{\bcdot, k'}\coloneqq \left( w_{j,k'}^{(l),k}\right)_{j\in J^{(l)}}
@@ -577,7 +595,7 @@ Wir resümieren, dass es im Eindimensionalen zwar immer von Vorteil ist, aufeina
 Hat man $L$ zweidimensionale Faltungslayer mit Kernen von $2\times 2$ räumlicher Größe, so ist die Anzahl an Parametern genau $5L$.
 Fusioniert man diese jedoch zu einem einzigen Faltungslayer, so erhält man einen Kern mit räumlicher Größe $(L+1)^2$ und einer Parameterzahl von $L^2 + 2L + 2$.
 
-In der Praxis werden Faltungslayer meist mit einer nicht-linearen Aktivierungsfunktion ausgestattet.
+In der Praxis werden Faltungslayer meist mit der nicht-linearen Aktivierungsfunktion ReLU ausgestattet.
 
 \subsection{Varianten der Faltungslayer}\label{subsec:variants-of-cross-corr}
 
@@ -624,7 +642,16 @@ In Abbildung~\ref{fig:cross-corr-with-padding} sieht man ein Beispiel von vollem
 \end{figure}
 
 
-
+Bei den erfolgreichen~\emph{MobileNets}, die in~\cite{DBLP:journals/corr/HowardZCKWWAA17} eingeführt wurden, kommt die sogenannte~\emph{\foreignlanguage{english}{Depthwise Separable Convolution}} zum Einsatz, also einem Layer welches jedes Input-Feature-Maps separat behandelt:
+Sei $x\in\R^{n_1^{(l-1)}\times n_2^{(l-1)}\times f^{(l-1)}}$ Input eines Depthwise-Separable-Convolutional-Layers.
+Es wird für jede Input-Feature-Map $k$ ein Kernel $w^{(l),k}$ aus $\R^{m_1^{(l)}\times m_2^{(l)}}$ gelernt.
+Der Output des Layers ist dann gegeben durch
+\[
+    x^{(l)}_{\bcdot,\bcdot,k} = w^{(l),k} \star x^{(l-1)}_{\bcdot,\bcdot, k} \quad \text{für $k\in\fNat{f^{(l-1)}}$}.
+\]
+Da man dadurch nur die Input-Features filtert, wird meist anschließend noch ein normales Faltungslayer mit räumlicher Kern-Größe $1\times 1$ verwendet, um die gefilterten Input-Features zu neuen Features zu kombinieren.
+Dies 
+Calin führt in~\cite[Abschnitt~16.5]{Calin2020} ausschließlich Depthwise-Separable-Convolutional-Layers ein, nennt diese aber \glqq Convolutional Layer\grqq.
 
 \subsection{Äquivarianz}
     
@@ -645,7 +672,7 @@ So ist es Faltungslayern egal, wo genau im Bild ein Merkmal versteckt ist; es wi
 
 Im krassen Gegensatz dazu ist es Dense-Layern nicht möglich, diese Art der Generalisierung selbständig zu lernen.
 So müsste es für jede möglich Position des Merkmals im Bild Testdaten geben, sodass die entsprechenden Neuronen darauf gelernt werden können.
-Entsprechend neigen Faltungslayer deutlich seltener zu Overfitting. 
+Deswegen neigen Faltungslayer deutlich seltener zu Overfitting. 
 
 \section{Pooling}
 
@@ -794,7 +821,7 @@ Wir folgen dabei den in~\cite[Kapitel~11]{Calin2020} vorgestellten Konzepten und
 
 
 \begin{proposition}[Informationsdarstellung des Pooling-Layer]
-    Seien $X_1,\dots,X_n$ die Zufallsvariablen der Inputs und $Y_1,\dots,Y_N$ die Zufallsvariablen des Outputs eines Max-Pooling-Layer, die durch $Y_i\coloneqq \max_{j \in Q_i} X_j$ gegeben sind.
+    Seien $X_1,\dots,X_n$ die Zufallsvariablen der Input-Neuronen und $Y_1,\dots,Y_N$ die Zufalls\-variablen des Outputs eines Max-Pooling-Layer, die durch $Y_i\coloneqq \max_{j \in Q_i} X_j$ gegeben sind.
     Dann gilt
     \[
       \sig{Y} \coloneqq \sig{Y_1,\dots,Y_N}\subseteq \bigcap_{j_1\in Q_1,\dots, j_N\in Q_N} \sig{X_{j_1}, \dots, X_{j_N}}  .
@@ -852,28 +879,78 @@ Eine Eigenschaft, die man in Bezug auf Pooling-Layer gerne hätte, wäre eine so
     Der Operator $\mathcal{P}$ heißt \emph{lokal translationsinvariant bezüglich $f$}, falls ein $\delta > 0$ existiert mit $\mathcal{P} ( T_a ( f ) ) = \mathcal{P} ( f )$ für alle $a\in\R^d$ mit $\norm{a} \leq \delta$.
 \end{definition}
 
-Diese würde neuronalen Netze zur Bildklassifizierung, welche Pooling-Layer benutzen, ermöglichen, kleine Verschiebungen des Input-Bildes zu ignorieren.
-
-Ovidiu behauptet in~\cite[Proposition~15.2.1]{Calin2020} die folgende Aussage:
+Diese würde neuronalen Netze zur Bildklassifizierung, welche Pooling-Layer benutzen, er\-mög\-lichen, kleine Verschiebungen des Input-Bildes zu ignorieren.
+In~\cite[Proposition~15.2.1]{Calin2020} behauptet Calin die folgende Aussage:
 \begin{proposition}[{\cite[Proposition~15.2.1]{Calin2020}}]
     Sei $f: \R \rightarrow \R$ eine stetige Funktion.
     Es gibt eine Zerlegung $Z$ von $\R$, sodass die Operation $\mathcal{P}^Z_{\max}$, die einer Funktion $g$ das zugehörige Max-Pooling bezüglich $g$ zuweist, lokal translationsinvariant ist.
 \end{proposition}
 
 Leider beruht der Beweis dieser Aussage auf einer falschen Annahme:
-So möchte Ovidiu eine Partition von Intervallen der Form $[x_i, x_{i+1})$ wählen, sodass sich die Maxima von ${f}\vert_{[x_i, x_{i+1})}$ innerhalb des offenen Intervalls $(x_i, x_{i+1})$ befinden.
+So möchte Calin eine Partition von Intervallen der Form $[x_i, x_{i+1})$ wählen, sodass sich die Maxima von ${f}\vert_{[x_i, x_{i+1})}$ innerhalb des offenen Intervalls $(x_i, x_{i+1})$ befinden.
 Dies ist für strikt monoton fallende Funktionen nicht möglich.
-Außerdem ist die Beschreibung der Partition mit endlichen Intervallen der beschriebenen Form in Ovidius Beweis nicht überzeugend.
-Geht man davon aus, dass $Z$ eine nicht-triviale Zerlegung aus Intervallen sein soll, so stellt jede strikt monoton wachsende Funktion $f$ ein Gegenbeispiel der Proposition dar.
+Außerdem ist die Beschreibung der Partition mit endlichen Intervallen der Form $[x_i, x_{i+1})$ in Calins Beweis nicht überzeugend.
+Geht man davon aus, dass $Z$ eine nicht-triviale Zerlegung aus Intervallen sein soll, so stellt jede strikt monoton fallende Funktion $f$ ein Gegenbeispiel der Proposition dar.
 
 Tatsächlich gibt es auch in der Praxis Untersuchungen, wonach die traditionellen Faltungsnetze aufgrund der Pooling-Layer nicht lokal translationsinvariant sind.
 Zhang hat in~\cite{zhang2019shiftinvar} untersucht wie Alias-Effekte, die durch das Downsampling von Pooling-Layern erzeugt werden, verringert werden können, um so eine höhere Stabilität des Netzes gegenüber lokaler Translation zu erzeugen.
 
 
-\section{Faltungsnetze}
+\section{Faltungsnetze für Bildklassifizierung}
+
+Neuronale Netze, die auf der Verwendung von Faltungslayern beruhen, werden Faltungsnetze (engl. \foreignlanguage{english}{Convolutional Neural Networks, CNNs}) genannt.
+Da sich die besten Architekturen, wie solch ein Netz aufgebaut ist, in sehr kurzen Zeitabständen ändern, wollen wir in diesem Abschnitt lediglich das LeNet-5 für die Klassifizierung handschriftlicher Ziffern genauer betrachten.
+
+Es sei angemerkt, dass die meisten neueren Netze der Bildklassifizierung Varianten des LeNet-5 sind, welche oft deutlich mehr Layer haben.
+Ein Beispiel dafür ist das sogenannte~\emph{AlexNet}, welches bei der ImageNet Large Scale Visual Recognition Challenge 2010 \cite{ILSVRC15} einen großen Durchbruch bei der Einordnung von Bildern in $1{.}000$ verschiedene Klassen erzielte.
+
+\begin{figure}
+    \noindent\makebox[\textwidth]{
+        \newcommand{\svgwidth}{1.2\textwidth}
+        \scriptsize
+        \input{lenet.pdf_tex}
+    }
+    \caption{Das LeNet-5 von LeCun et al. in~\cite{lecun1998}, angewandt auf die MNIST-Datenbank.
+    {\scriptsize(Grafik angepasst aus~\cite{lecun1998})}}
+    \label{fig:lenet-5}
+\end{figure}
+
+Die meisten Faltungsnetze folgen dem folgenden Schema:
+Zunächst werden in einer Phase der \emph{Feature-Extraktion} Faltungslayer und Pooling-Layer -- meist abwechselnd -- in Reihe geschalten.
+Dies wird so lange gemacht, bis die räumliche Dimension derart verkleinert wurde, bis schließlich mit wenigen Fully-Connected-Layern die Dimension auf die gewünschte Anzahl an Klassen reduziert wird.
+
+Eine schematische Darstellung des LeNet-5 ist in Abbildung~\ref{fig:lenet-5} zu sehen.
+Hier werden zwei Faltungslayer jeweils mit Kern-Größe $5\times 5$ abwechselnd mit zwei $(2\times 2)$-Pooling-Layern verwendet.
+Im ersten Layer werden aus dem Input-Bild der Größe $32\times 32$ sechs Feature-Maps erstellt.
+Im nächsten Schritt werden diese mittels Pooling-Layer von $28\times 28$ auf $14\times 14$ verkleinert.
+LeCun et.\,al. verwenden dabei eine parametrisierte Variante der Pooling-Layer, die hier nicht näher erläutert wird.
+Darauf werden aus diesen $6$ Feature-Maps mit einem Faltungslayer $16$ weitere Feature-Maps der Größe $10\times 10$ extrahiert.
+Diese werden ein weiteres Mal durch Pooling auf die Größe $5\times 5$ verkleinert.
+
+Nach dem letzten Pooling-Layer erhält man $5\cdot 5\cdot 16 = 400$ Neuronen.
+Es folgen drei Fully-Connected-Layer der Größen $120$, $84$ und schließlich $10$, welche gleichzeitig die Output-Neuronen des Netzes sind.
+
+Ignoriert man die zusätzlichen Parameter in den Pooling-Layern, so enthält dieses Netz genau $61{.}706$ Parameter:
+\[
+    \underbrace{6\cdot (5\cdot 5 + 1)}_{\text{1. Faltungslayer}} + 
+    \underbrace{16\cdot (5\cdot 5\cdot 6 + 1)}_{\text{2. Faltungslayer}}  + 
+    \underbrace{120\cdot(400+1) + 84\cdot(120+1) + 10 \cdot (84+1)}_{\text{Fully-Connected-Layers}}
+    = 61{.}706,
+\]
+wobei der Großteil dieser Parameter immer noch von den Fully-Connected-Layern stammt.
+Im Rahmen dieser Arbeit wurde das LeNet-5 mit einem Netz mit 5 Fully-Connected-Layern der Größen $32\cdot 32=1024$, $54$, $48$, $48$, $32$ und $10$ verglichen.
+Solch ein Netz nennt man auch \emph{\foreignlanguage{english}{Multi-Layer-Perzeptron} (MLP)}.
+Die Größen der Layer wurden so gewählt, dass die Anzahl an Parametern mit $62{.}240$ ähnlich hoch ist.
+Das LeNet-5 wurde im Experiment mit Average-Pooling implementiert, was bereits durch das verwendete Keras-Framework (\cite{chollet2015keras}) bereitgestellt wird.
+
+Es wurden jeweils 10 Epochen mit $60{.}000$ Trainingsbilder trainiert; validiert wurde mit $10{.}000$ Testbildern.
+Da Faltungslayer etwas aufwändiger sind zu berechnen, war das LeNet-5 etwa $2{,}6$-fach langsamer als das MLP, welches statt $429$ nur $166$ Sekunden brauchte.
+Das LeNet-5 erreichte dafür bereits nach einer Epoche eine Test-Richtigkeit von $96{,}8\%$ und nach $10$ Epochen betrug die Richtigkeit $98{,}5\%$.
+Das MLP hingegen erreichte nach einer Epoche den Wert $87{,}1\%$ und nach $10$ Epochen den Wert $95{,}5\%$.
+Dies zeigt, welch großer Vorteil die Verwendung von Faltungslayern in diesen Anwendungsgebieten bietet.
 
 
-\clearpage          % neue Seite für Literaturverzeichnis
+\clearpage % neue Seite für Literaturverzeichnis
 \thispagestyle{empty}
 \bibliography{literature}
 

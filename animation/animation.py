@@ -84,7 +84,7 @@ def animate_corr(i):
 
 def save_f():
     plt.clf()
-    plt.plot(x, y_f, '-', label="$f$")
+    plt.plot(x, y_f, '--', label="$f$")
     plt.yticks([0., 1.])
     plt.axis([-1.5, 1.5, -0.2, 1.2])
     plt.gca().set_aspect('equal', adjustable='box')
@@ -95,7 +95,8 @@ def save_f():
 
 def save_g():
     plt.clf()
-    plt.plot(x, y_g, '-', label="$g$", color='#ff7f0e')
+    plt.plot(x, y_f, '-', label="$f$")
+    plt.plot(x, y_g, '--', dashes=(6.5,6.5), label="$g$")
     plt.yticks([0., 1.])
     plt.axis([-1.5, 1.5, -0.2, 1.2])
     plt.gca().set_aspect('equal', adjustable='box')
@@ -105,18 +106,32 @@ def save_g():
     plt.close()
 
 
+def save_corr():
+    plt.clf()
+    plt.plot(x, conv, '-', label="$f* g$")
+    plt.plot(x, corr, '--', dashes=(6.5,6.5), label="$f \star g$")
+    plt.yticks([0., 1.])
+    plt.axis([-1.5, 1.5, -0.2, 1.2])
+    plt.gca().set_aspect('equal', adjustable='box')
+    plt.legend(loc='upper right')
+    fig.set_size_inches(6.4, 3.2, True)
+    plt.savefig("g.png", dpi=200)
+    plt.close()
+
 fig = plt.figure()
-save_g()
-fig = plt.figure()
-save_f()
-#
+#save_g()
+
+save_corr()
+# fig = plt.figure()
+# save_f()
+# #
 
 
-fig = plt.figure()
-anim = animation.FuncAnimation(fig, animate_corr, frames=frames, interval=20, blit=True)
-fig.set_size_inches(6.4, 3.2, True)
-anim.save('cross-correlation.mp4', fps=30, extra_args=['-vcodec', 'libx264'], dpi=200)
+# fig = plt.figure()
+# anim = animation.FuncAnimation(fig, animate_corr, frames=frames, interval=20, blit=True)
+# fig.set_size_inches(6.4, 3.2, True)
+# anim.save('cross-correlation.mp4', fps=30, extra_args=['-vcodec', 'libx264'], dpi=200)
 
-anim = animation.FuncAnimation(fig, animate_conv, frames=frames, interval=20, blit=True)
-fig.set_size_inches(6.4, 3.2, True)
-anim.save('convolution.mp4', fps=30, extra_args=['-vcodec', 'libx264'], dpi=200)
+# anim = animation.FuncAnimation(fig, animate_conv, frames=frames, interval=20, blit=True)
+# fig.set_size_inches(6.4, 3.2, True)
+# anim.save('convolution.mp4', fps=30, extra_args=['-vcodec', 'libx264'], dpi=200)

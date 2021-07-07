@@ -40,3 +40,11 @@ Hyperrechtecken
 Hyperrechteck
 Ovidius
 Overfitting
+Faltungsnetz
+Fully-Connected-Layern
+Fully-Connected-Layers
+LeNet-5
+Depthwise-Separable-Convolutional-Layers
+Convolutional
+LeNet
+MLP

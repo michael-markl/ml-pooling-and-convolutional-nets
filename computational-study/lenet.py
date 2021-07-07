@@ -4,7 +4,6 @@ import pandas as pd
 from time import time
 
 from sklearn.model_selection import train_test_split
-import tensorflow as tf
 import keras
 import keras.layers as layers
 from keras.models import Sequential
