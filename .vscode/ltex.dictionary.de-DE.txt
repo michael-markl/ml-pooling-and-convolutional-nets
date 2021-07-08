@@ -48,3 +48,4 @@ Depthwise-Separable-Convolutional-Layers
 Convolutional
 LeNet
 MLP
+Faltungsnetzes
